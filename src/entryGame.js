@@ -1,26 +1,13 @@
-import * as ROT from "rot-js";
+import { DISPLAY } from "./constants/screen";
 
-const SCREEN_WIDTH = 80;
-const SCREEN_HEIGHT = 25;
+import { generateDungeon } from "./utils/generateDungeon";
 
-const display = new ROT.Display({
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-});
-
-function drawCharacter(x, y, character, fgColor, bgColor) {
-    display.draw(x, y, character, fgColor, bgColor);
-}
-
-function clearDisplay() {
-    display.clear();
-}
+const clearDisplay = () => DISPLAY.clear();
 
 export const initializeGame = () => {
-    document.body.appendChild(display.getContainer());
+    document.body.appendChild(DISPLAY.getContainer());
 
     clearDisplay();
 
-    drawCharacter(10, 5, "@", "red");
-    drawCharacter(25, 4, "#", "blue", "#fff");
+    generateDungeon(DISPLAY);
 };
