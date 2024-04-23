@@ -1,17 +1,14 @@
-import { Display } from "rot-js";
+import { Display, FOV } from "rot-js";
 import { Tile, WALL_TILE } from "../Tiles/Tile-types";
+import { Entity } from "../Entity/Entity";
 export class GameMap {
-    width: number;
-    height: number;
-    display: Display;
-
     tiles: Tile[][];
 
-    constructor(width: number, height: number, display: Display) {
-        this.width = width;
-        this.height = height;
-        this.display = display;
-
+    constructor(
+        public width: number,
+        public height: number,
+        public display: Display
+    ) {
         this.tiles = new Array(this.height);
 
         for (let y = 0; y < this.height; y++) {
@@ -40,6 +37,29 @@ export class GameMap {
         }
     }
 
+    lightPasses(x: number, y: number): boolean {
+        if (this.isInBounds(x, y)) return this.tiles[y][x].transparent;
+
+        return false;
+    }
+
+    updateFov(player: Entity) {
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                this.tiles[y][x].visible = false;
+            }
+        }
+
+        const fov = new FOV.PreciseShadowcasting(this.lightPasses.bind(this));
+
+        fov.compute(player.x, player.y, 8, (x, y, _r, visibility) => {
+            if (visibility === 1) {
+                this.tiles[y][x].visible = true;
+                this.tiles[y][x].seen = true;
+            }
+        });
+    }
+
     render() {
         for (let y = 0; y < this.tiles.length; y++) {
             const row = this.tiles[y];
@@ -47,13 +67,21 @@ export class GameMap {
             for (let x = 0; x < row.length; x++) {
                 const tile = row[x];
 
-                this.display.draw(
-                    x,
-                    y,
-                    tile.dark.char,
-                    tile.dark.fg,
-                    tile.dark.bg
-                );
+                let char = " ";
+                let fg = "#fff";
+                let bg = "#000";
+
+                if (tile.visible) {
+                    char = tile.light.char;
+                    fg = tile.light.fg;
+                    bg = tile.light.bg;
+                } else if (tile.seen) {
+                    char = tile.dark.char;
+                    fg = tile.dark.fg;
+                    bg = tile.dark.bg;
+                }
+
+                this.display.draw(x, y, char, fg, bg);
             }
         }
     }
