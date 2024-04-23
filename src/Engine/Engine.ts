@@ -3,6 +3,7 @@ import * as ROT from "rot-js";
 import { handleInput } from "../movement/handlerFunctions";
 import { Entity } from "../Entity/Entity";
 import { GameMap } from "../Map/Map";
+import { generateDungeon } from "../Map/Generation/Generation";
 
 export class Engine {
     public static readonly WIDTH = 80;
@@ -30,7 +31,15 @@ export class Engine {
 
         document.body.appendChild(container);
 
-        this.gameMap = new GameMap(Engine.WIDTH, Engine.HEIGHT, this.display);
+        this.gameMap = generateDungeon(
+            Engine.WIDTH,
+            Engine.HEIGHT,
+            5,
+            5,
+            20,
+            this.player,
+            this.display
+        );
 
         window.addEventListener("keydown", (event) => {
             this.update(event);
