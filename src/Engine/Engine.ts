@@ -9,14 +9,15 @@ export class Engine {
     public static readonly WIDTH = 80;
     public static readonly HEIGHT = 50;
 
+    public static readonly MAX_MONSTERS_PER_ROOM = 2;
+
     display: ROT.Display;
 
     player: Entity;
-    entities: Entity[];
 
     gameMap: GameMap;
 
-    constructor(entities: Entity[], player: Entity) {
+    constructor(player: Entity) {
         this.display = new ROT.Display({
             width: Engine.WIDTH,
             height: Engine.HEIGHT,
@@ -24,7 +25,6 @@ export class Engine {
             fontSize: 18,
         });
 
-        this.entities = entities;
         this.player = player;
 
         const container = this.display.getContainer()!;
@@ -37,6 +37,7 @@ export class Engine {
             5,
             5,
             20,
+            Engine.MAX_MONSTERS_PER_ROOM,
             this.player,
             this.display
         );
@@ -49,6 +50,14 @@ export class Engine {
         this.render();
     }
 
+    handleEnemyTurns() {
+        this.gameMap.nonPlayerEntities.forEach((e) => {
+            console.log(
+                `The ${e.name} wonders when it will get to take a real turn.`
+            );
+        });
+    }
+
     update(event: KeyboardEvent) {
         this.display.clear();
 
@@ -56,15 +65,12 @@ export class Engine {
 
         if (action) action.perform(this, this.player);
 
+        this.handleEnemyTurns();
         this.gameMap.updateFov(this.player);
         this.render();
     }
 
     render() {
         this.gameMap.render();
-
-        this.entities.forEach((e) => {
-            this.display.draw(e.x, e.y, e.char, e.fg, e.bg);
-        });
     }
 }

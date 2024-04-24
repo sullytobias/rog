@@ -7,7 +7,8 @@ export class GameMap {
     constructor(
         public width: number,
         public height: number,
-        public display: Display
+        public display: Display,
+        public entities: Entity[]
     ) {
         this.tiles = new Array(this.height);
 
@@ -20,6 +21,10 @@ export class GameMap {
 
             this.tiles[y] = row;
         }
+    }
+
+    public get nonPlayerEntities(): Entity[] {
+        return this.entities.filter((e) => e.name !== "Player");
     }
 
     isInBounds(x: number, y: number) {
@@ -60,6 +65,12 @@ export class GameMap {
         });
     }
 
+    getBlockingEntityAtLocation(x: number, y: number): Entity | undefined {
+        return this.entities.find(
+            (e) => e.blocksMovement && e.x === x && e.y === y
+        );
+    }
+
     render() {
         for (let y = 0; y < this.tiles.length; y++) {
             const row = this.tiles[y];
@@ -84,5 +95,11 @@ export class GameMap {
                 this.display.draw(x, y, char, fg, bg);
             }
         }
+
+        this.entities.forEach((e) => {
+            if (this.tiles[e.y][e.x].visible) {
+                this.display.draw(e.x, e.y, e.char, e.fg, e.bg);
+            }
+        });
     }
 }

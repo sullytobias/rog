@@ -1,23 +1,13 @@
 export class Entity {
-    x: number;
-    y: number;
-    char: string;
-    fg: string;
-    bg: string;
-
     constructor(
-        x: number,
-        y: number,
-        char: string,
-        fg: string = "#fff",
-        bg: string = "#000"
-    ) {
-        this.x = x;
-        this.y = y;
-        this.char = char;
-        this.fg = fg;
-        this.bg = bg;
-    }
+        public x: number,
+        public y: number,
+        public char: string,
+        public fg: string = "#fff",
+        public bg: string = "#000",
+        public name: string = "<Unnamed>",
+        public blocksMovement: boolean = false
+    ) {}
 
     move(dx: number, dy: number) {
         this.x += dx;

@@ -1,5 +1,5 @@
-import { Entity } from "./Entity/Entity";
 import { Engine } from "./Engine/Engine";
+import { spawnPlayer } from "./Entity/SpawnHelpers";
 
 declare global {
     interface Window {
@@ -8,14 +8,7 @@ declare global {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const npc = new Entity(
-        Engine.WIDTH / 2 - 5,
-        Engine.HEIGHT / 2,
-        "@",
-        "#ff0"
+    window.engine = new Engine(
+        spawnPlayer(Engine.WIDTH / 2, Engine.HEIGHT / 2)
     );
-    const player = new Entity(Engine.WIDTH / 2, Engine.HEIGHT / 2, "@");
-    const entities = [npc, player];
-
-    window.engine = new Engine(entities, player);
 });
