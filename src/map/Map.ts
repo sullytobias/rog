@@ -1,6 +1,6 @@
 import { Display, FOV } from "rot-js";
 import { Tile, WALL_TILE } from "../Tiles/Tile-types";
-import { Entity } from "../Entity/Entity";
+import { Actor, Entity } from "../Entity/Entity";
 export class GameMap {
     tiles: Tile[][];
 
@@ -25,6 +25,13 @@ export class GameMap {
 
     public get nonPlayerEntities(): Entity[] {
         return this.entities.filter((e) => e.name !== "Player");
+    }
+
+    public get actors(): Actor[] {
+        return this.entities
+            .filter((e) => e instanceof Actor)
+            .map((e) => e as Actor)
+            .filter((a) => a.isAlive);
     }
 
     isInBounds(x: number, y: number) {
@@ -71,6 +78,10 @@ export class GameMap {
         );
     }
 
+    getActorAtLocation(x: number, y: number): Actor | undefined {
+        return this.actors.find((a) => a.x === x && a.y === y);
+    }
+
     render() {
         for (let y = 0; y < this.tiles.length; y++) {
             const row = this.tiles[y];
@@ -96,7 +107,11 @@ export class GameMap {
             }
         }
 
-        this.entities.forEach((e) => {
+        const sortedEntities = this.entities
+            .slice()
+            .sort((a, b) => a.renderOrder - b.renderOrder);
+
+        sortedEntities.forEach((e) => {
             if (this.tiles[e.y][e.x].visible) {
                 this.display.draw(e.x, e.y, e.char, e.fg, e.bg);
             }
