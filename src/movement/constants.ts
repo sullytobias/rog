@@ -1,4 +1,10 @@
-import { BumpAction, LogAction, WaitAction } from "./inputHandler";
+import {
+    BumpAction,
+    InventoryAction,
+    LogAction,
+    PickupAction,
+    WaitAction,
+} from "./inputHandler";
 import { MovementMap } from "./interfaces";
 
 export const MOVE_KEYS: MovementMap = {
@@ -34,4 +40,7 @@ export const MOVE_KEYS: MovementMap = {
     ".": new WaitAction(),
     // UI keys
     v: new LogAction(),
+    g: new PickupAction(),
+    i: new InventoryAction(true),
+    d: new InventoryAction(false),
 };

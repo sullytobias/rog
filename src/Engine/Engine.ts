@@ -11,11 +11,14 @@ import {
 } from "../Ui/Render";
 import { MessageLog } from "../Ui/MessageLog";
 import { Colors } from "../Colors/Colors";
+import { handleInventoryInput } from "../movement/inputHandler";
 
 export enum EngineState {
     Game,
     Dead,
     Log,
+    UseInventory,
+    DropInventory,
 }
 
 export class Engine {
@@ -26,6 +29,8 @@ export class Engine {
     public static readonly MAP_HEIGHT = 43;
 
     public static readonly MAX_MONSTERS_PER_ROOM = 2;
+
+    public static readonly MAX_ITEMS_PER_ROOM = 2;
 
     display: ROT.Display;
 
@@ -69,6 +74,7 @@ export class Engine {
             5,
             20,
             Engine.MAX_MONSTERS_PER_ROOM,
+            Engine.MAX_ITEMS_PER_ROOM,
             this.player,
             this.display
         );
@@ -97,7 +103,9 @@ export class Engine {
     handleEnemyTurns() {
         this.gameMap.actors.forEach((e) => {
             if (e.isAlive) {
-                e.ai?.perform(e);
+                try {
+                    e.ai?.perform(e);
+                } catch {}
             }
         });
     }
@@ -107,15 +115,15 @@ export class Engine {
             const action = handleGameInput(event);
 
             if (action) {
-                action.perform(this.player);
+                try {
+                    action.perform(this.player);
 
-                if (this.state === EngineState.Game) {
-                    this.handleEnemyTurns();
-                }
+                    if (this.state === EngineState.Game) {
+                        this.handleEnemyTurns();
+                    }
+                } catch {}
             }
         }
-
-        this.gameMap.updateFov(this.player);
     }
 
     processLogLoop(event: KeyboardEvent) {
@@ -138,11 +146,44 @@ export class Engine {
         }
     }
 
+    processInventoryLoop(event: KeyboardEvent) {
+        const action = handleInventoryInput(event);
+        action?.perform(this.player);
+    }
+
+    renderInventory(title: string) {
+        const itemCount = this.player.inventory.items.length;
+        const height = itemCount + 2 <= 3 ? 3 : itemCount + 2;
+        const width = title.length + 4;
+        const x = this.player.x <= 30 ? 40 : 0;
+        const y = 0;
+
+        renderFrameWithTitle(x, y, width, height, title);
+
+        if (itemCount > 0) {
+            this.player.inventory.items.forEach((i, index) => {
+                const key = String.fromCharCode("a".charCodeAt(0) + index);
+                this.display.drawText(
+                    x + 1,
+                    y + index + 1,
+                    `(${key}) ${i.name}`
+                );
+            });
+        } else {
+            this.display.drawText(x + 1, y + 1, "(Empty)");
+        }
+    }
+
     update(event: KeyboardEvent) {
         if (this.state === EngineState.Game) {
             this.processGameLoop(event);
         } else if (this.state === EngineState.Log) {
             this.processLogLoop(event);
+        } else if (
+            this.state === EngineState.UseInventory ||
+            this.state === EngineState.DropInventory
+        ) {
+            this.processInventoryLoop(event);
         }
 
         this.render();
@@ -173,6 +214,13 @@ export class Engine {
                 36,
                 this.messageLog.messages.slice(0, this.logCursorPosition + 1)
             );
+        }
+
+        if (this.state === EngineState.UseInventory) {
+            this.renderInventory("Select an item to use");
+        }
+        if (this.state === EngineState.DropInventory) {
+            this.renderInventory("Select an item to drop");
         }
     }
 }
