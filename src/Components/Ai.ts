@@ -2,11 +2,7 @@ import * as ROT from "rot-js";
 
 import { Actor, Entity } from "../Entity/Entity";
 import { Action } from "../movement/interfaces";
-import {
-    MeleeAction,
-    MovementAction,
-    WaitAction,
-} from "../movement/inputHandler";
+import { MeleeAction, MovementAction, WaitAction } from "../movement/Actions";
 
 export abstract class Ai implements Action {
     path: [number, number][];

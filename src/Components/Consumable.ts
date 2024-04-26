@@ -1,6 +1,6 @@
 import { Colors } from "../Colors/Colors";
 import { Actor, Entity, Item } from "../Entity/Entity";
-import { ItemAction } from "../movement/inputHandler";
+import { ItemAction } from "../movement/Actions";
 import { Action } from "../movement/interfaces";
 import { Inventory } from "./Inventory";
 
