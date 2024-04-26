@@ -1,4 +1,4 @@
-import { BumpAction, WaitAction } from "./inputHandler";
+import { BumpAction, LogAction, WaitAction } from "./inputHandler";
 import { MovementMap } from "./interfaces";
 
 export const MOVE_KEYS: MovementMap = {
@@ -31,5 +31,7 @@ export const MOVE_KEYS: MovementMap = {
     n: new BumpAction(1, 1),
     // Wait keys
     5: new WaitAction(),
-    Period: new WaitAction(),
+    ".": new WaitAction(),
+    // UI keys
+    v: new LogAction(),
 };

@@ -1,3 +1,4 @@
+import { Colors } from "../Colors/Colors";
 import { Actor, RenderOrder } from "../Entity/Entity";
 import { Base } from "./Base";
 
@@ -28,9 +29,15 @@ export class Fighter implements Base {
         if (!this.entity) return;
 
         let deathMessage = "";
+        let fg = null;
 
-        if (window.engine.player === this.entity) deathMessage = "You died!";
-        else deathMessage = `${this.entity.name} is dead!`;
+        if (window.engine.player === this.entity) {
+            deathMessage = "You died!";
+            fg = Colors.PlayerDie;
+        } else {
+            deathMessage = `${this.entity.name} is dead!`;
+            fg = Colors.EnemyDie;
+        }
 
         this.entity.char = "%";
         this.entity.fg = "#bf0000";
@@ -39,6 +46,6 @@ export class Fighter implements Base {
         this.entity.name = `Remains of ${this.entity.name}`;
         this.entity.renderOrder = RenderOrder.Corpse;
 
-        console.log(deathMessage);
+        window.engine.messageLog.addMessage(deathMessage, fg);
     }
 }

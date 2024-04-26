@@ -1,3 +1,5 @@
+import { Colors } from "../Colors/Colors";
+import { EngineState } from "../Engine/Engine";
 import { Actor, Entity } from "../Entity/Entity";
 import { Action } from "./interfaces";
 
@@ -38,24 +40,37 @@ export class MeleeAction extends ActionWithDirection {
             target.name
         }`;
 
+        const fg =
+            actor.name === "Player" ? Colors.PlayerAttack : Colors.EnemyAttack;
         if (damage > 0) {
-            console.log(`${attackDescription} for ${damage} hit points.`);
+            window.engine.messageLog.addMessage(
+                `${attackDescription} for ${damage} hit points.`,
+                fg
+            );
             target.fighter.hp -= damage;
         } else {
-            console.log(`${attackDescription} but does no damage.`);
+            window.engine.messageLog.addMessage(
+                `${attackDescription} but does no damage.`,
+                fg
+            );
         }
     }
 }
-
 export class BumpAction extends ActionWithDirection {
     perform(entity: Entity) {
         const destX = entity.x + this.dx;
         const destY = entity.y + this.dy;
 
         if (window.engine.gameMap.getBlockingEntityAtLocation(destX, destY)) {
-            return new MeleeAction(this.dx, this.dy).perform(entity);
+            return new MeleeAction(this.dx, this.dy).perform(entity as Actor);
         } else {
             return new MovementAction(this.dx, this.dy).perform(entity);
         }
+    }
+}
+
+export class LogAction implements Action {
+    perform(_entity: Entity) {
+        window.engine.state = EngineState.Log;
     }
 }
