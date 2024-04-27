@@ -1,6 +1,6 @@
 import { Colors } from "../Colors/Colors";
 import { Actor, Entity, Item } from "../Entity/Entity";
-import { ImpossibleException } from "../Execptions/Exeptions";
+import { ImpossibleException } from "../Exeptions/Exeptions";
 import { GameMap } from "../Map/Map";
 import { Action, ItemAction } from "../movement/Actions";
 import {

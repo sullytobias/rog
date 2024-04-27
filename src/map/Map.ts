@@ -1,8 +1,10 @@
 import { Display, FOV } from "rot-js";
 import { Tile, WALL_TILE } from "../Tiles/Tile-types";
 import { Actor, Entity, Item } from "../Entity/Entity";
+
 export class GameMap {
     tiles: Tile[][];
+    downstairsLocation: [number, number];
 
     constructor(
         public width: number,
@@ -11,16 +13,14 @@ export class GameMap {
         public entities: Entity[]
     ) {
         this.tiles = new Array(this.height);
-
         for (let y = 0; y < this.height; y++) {
             const row = new Array(this.width);
-
             for (let x = 0; x < this.width; x++) {
                 row[x] = { ...WALL_TILE };
             }
-
             this.tiles[y] = row;
         }
+        this.downstairsLocation = [0, 0];
     }
 
     public get nonPlayerEntities(): Entity[] {

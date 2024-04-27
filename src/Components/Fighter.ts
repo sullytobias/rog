@@ -62,5 +62,7 @@ export class Fighter extends Base {
         this.parent.renderOrder = RenderOrder.Corpse;
 
         window.messageLog.addMessage(deathMessage, fg);
+
+        window.engine.player.level.addXp(this.parent.level.xpGiven);
     }
 }

@@ -1,7 +1,7 @@
 import { Display } from "rot-js";
 import { Colors } from "../Colors/Colors";
 import { Actor, Item } from "../Entity/Entity";
-import { ImpossibleException } from "../Execptions/Exeptions";
+import { ImpossibleException } from "../Exeptions/Exeptions";
 import { generateDungeon } from "../Map/Generation/Generation";
 import { GameMap } from "../Map/Map";
 import { Action } from "../movement/Actions";
@@ -36,9 +36,18 @@ type SerializedEntity = {
     bg: string;
     name: string;
     fighter: SerializedFighter | null;
+    level: SerializedLevel | null;
     aiType: string | null;
     confusedTurnsRemaining: number;
     inventory: SerializedItem[] | null;
+};
+
+type SerializedLevel = {
+    levelUpBase: number;
+    xpGiven: number;
+    currentLevel: number;
+    currentXp: number;
+    levelUpFactor: number;
 };
 
 type SerializedFighter = {
@@ -53,6 +62,7 @@ type SerializedItem = {
 };
 
 type SerializedGameMap = {
+    currentFloor: number;
     width: number;
     height: number;
     tiles: Tile[][];
@@ -65,38 +75,29 @@ export class GameScreen extends BaseScreen {
     public static readonly MIN_ROOM_SIZE = 6;
     public static readonly MAX_ROOM_SIZE = 10;
     public static readonly MAX_ROOMS = 30;
-    public static readonly MAX_MONSTERS_PER_ROOM = 2;
-    public static readonly MAX_ITEMS_PER_ROOM = 2;
 
-    gameMap: GameMap;
+    gameMap!: GameMap;
     inputHandler: BaseInputHandler;
 
     constructor(
         display: Display,
         player: Actor,
-        serializedGameMap: string | null = null
+        serializedGameMap: string | null = null,
+        public currentFloor: number = 0
     ) {
         super(display, player);
 
         if (serializedGameMap) {
-            const [map, loadedPlayer] = GameScreen.load(
+            const [map, loadedPlayer, floor] = GameScreen.load(
                 serializedGameMap,
                 display
             );
+
             this.gameMap = map;
             this.player = loadedPlayer;
+            this.currentFloor = floor;
         } else {
-            this.gameMap = generateDungeon(
-                GameScreen.MAP_WIDTH,
-                GameScreen.MAP_HEIGHT,
-                GameScreen.MAX_ROOMS,
-                GameScreen.MIN_ROOM_SIZE,
-                GameScreen.MAX_ROOM_SIZE,
-                GameScreen.MAX_MONSTERS_PER_ROOM,
-                GameScreen.MAX_ITEMS_PER_ROOM,
-                this.player,
-                this.display
-            );
+            this.generateFloor();
         }
 
         this.inputHandler = new GameInputHandler();
@@ -105,11 +106,13 @@ export class GameScreen extends BaseScreen {
 
     private toObject(): SerializedGameMap {
         return {
+            currentFloor: this.currentFloor,
             width: this.gameMap.width,
             height: this.gameMap.height,
             tiles: this.gameMap.tiles,
             entities: this.gameMap.entities.map((e) => {
                 let fighter = null;
+                let level = null;
                 let aiType = null;
                 let inventory = null;
                 let confusedTurnsRemaining = 0;
@@ -117,7 +120,22 @@ export class GameScreen extends BaseScreen {
                 if (e instanceof Actor) {
                     const actor = e as Actor;
                     const { maxHp, _hp: hp, defense, power } = actor.fighter;
+                    const {
+                        currentXp,
+                        currentLevel,
+                        levelUpBase,
+                        levelUpFactor,
+                        xpGiven,
+                    } = actor.level;
+
                     fighter = { maxHp, hp, defense, power };
+                    level = {
+                        currentXp,
+                        currentLevel,
+                        levelUpBase,
+                        levelUpFactor,
+                        xpGiven,
+                    };
 
                     if (actor.ai) {
                         aiType =
@@ -132,13 +150,11 @@ export class GameScreen extends BaseScreen {
 
                     if (actor.inventory) {
                         inventory = [];
-
                         for (let item of actor.inventory.items) {
                             inventory.push({ itemType: item.name });
                         }
                     }
                 }
-
                 return {
                     x: e.x,
                     y: e.y,
@@ -147,6 +163,7 @@ export class GameScreen extends BaseScreen {
                     bg: e.bg,
                     name: e.name,
                     fighter,
+                    level,
                     aiType,
                     confusedTurnsRemaining,
                     inventory,
@@ -164,20 +181,24 @@ export class GameScreen extends BaseScreen {
     private static load(
         serializedGameMap: string,
         display: Display
-    ): [GameMap, Actor] {
+    ): [GameMap, Actor, number] {
         const parsedMap = JSON.parse(serializedGameMap) as SerializedGameMap;
         const playerEntity = parsedMap.entities.find(
             (e) => e.name === "Player"
         );
-        if (!playerEntity) throw new Error("Player not found");
+        if (!playerEntity) throw new Error("shit broke");
 
         const player = spawnPlayer(playerEntity.x, playerEntity.y);
+
         player.fighter.hp = playerEntity.fighter?.hp || player.fighter.hp;
+        player.level.currentLevel = playerEntity.level?.currentLevel;
+        player.level.currentXp = playerEntity.level?.currentXp;
         window.engine.player = player;
 
         const map = new GameMap(parsedMap.width, parsedMap.height, display, [
             player,
         ]);
+
         map.tiles = parsedMap.tiles;
 
         const playerInventory = playerEntity?.inventory || [];
@@ -239,7 +260,22 @@ export class GameScreen extends BaseScreen {
                 spawnFireballScroll(map, e.x, e.y);
             }
         }
-        return [map, player];
+
+        return [map, player, parsedMap.currentFloor];
+    }
+
+    generateFloor(): void {
+        this.currentFloor += 1;
+        this.gameMap = generateDungeon(
+            GameScreen.MAP_WIDTH,
+            GameScreen.MAP_HEIGHT,
+            GameScreen.MAX_ROOMS,
+            GameScreen.MIN_ROOM_SIZE,
+            GameScreen.MAX_ROOM_SIZE,
+            this.player,
+            this.display,
+            this.currentFloor
+        );
     }
 
     handleEnemyTurns() {
@@ -282,6 +318,7 @@ export class GameScreen extends BaseScreen {
 
     render() {
         this.display.clear();
+
         window.messageLog.render(this.display, 21, 45, 40, 5);
 
         renderHealthBar(
@@ -297,6 +334,8 @@ export class GameScreen extends BaseScreen {
             this.inputHandler.mousePosition,
             this.gameMap
         );
+
+        this.display.drawText(0, 47, `Dungeon level: ${this.currentFloor}`);
 
         this.gameMap.render();
 
@@ -324,6 +363,7 @@ export class GameScreen extends BaseScreen {
             const [x, y] = this.inputHandler.mousePosition;
             this.display.drawOver(x, y, null, "#000", "#fff");
         }
+
         this.inputHandler.onRender(this.display);
     }
 

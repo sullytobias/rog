@@ -3,6 +3,7 @@ import { Base } from "../Components/Base";
 import { Consumable } from "../Components/Consumable";
 import { Fighter } from "../Components/Fighter";
 import { Inventory } from "../Components/Inventory";
+import { Level } from "../Components/Level";
 import { GameMap } from "../Map/Map";
 
 export enum RenderOrder {
@@ -69,6 +70,7 @@ export class Actor extends Entity {
         public ai: Ai | null,
         public fighter: Fighter,
         public inventory: Inventory,
+        public level: Level,
         public parent: GameMap | null = null
     ) {
         super(x, y, char, fg, bg, name, true, RenderOrder.Actor, parent);
@@ -96,3 +98,6 @@ export class Item extends Entity {
         this.consumable.parent = this;
     }
 }
+
+
+  

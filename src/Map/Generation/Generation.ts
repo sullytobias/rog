@@ -1,5 +1,10 @@
-import { Display } from "rot-js";
-import { FLOOR_TILE, Tile, WALL_TILE } from "../../Tiles/Tile-types";
+import { Display, RNG } from "rot-js";
+import {
+    FLOOR_TILE,
+    STAIRS_DOWN_TILE,
+    Tile,
+    WALL_TILE,
+} from "../../Tiles/Tile-types";
 import { GameMap } from "../Map";
 import { Entity } from "../../Entity/Entity";
 import { Bounds } from "./interfaces";
@@ -11,6 +16,84 @@ import {
     spawnOrc,
     spawnTroll,
 } from "../../Entity/SpawnHelpers";
+
+type FloorValue = [number, number][];
+
+const MAX_ITEMS_BY_FLOOR: FloorValue = [
+    [1, 1],
+    [4, 2],
+];
+
+const MAX_MONSTERS_BY_FLOOR: FloorValue = [
+    [1, 2],
+    [4, 3],
+    [6, 5],
+];
+
+type SPAWNMAP = {
+    [key: string]: (gameMap: GameMap, x: number, y: number) => Entity;
+};
+
+export const spawnMap: SPAWNMAP = {
+    spawnOrc,
+    spawnTroll,
+    spawnHealthPotion,
+    spawnConfusionScroll,
+    spawnLightningScroll,
+    spawnFireballScroll,
+};
+
+type Choice = {
+    value: string;
+    weight: number;
+};
+
+type WeightedChoices = {
+    floor: number;
+    weights: Choice[];
+};
+
+const ITEM_CHANCES: WeightedChoices[] = [
+    {
+        floor: 0,
+        weights: [{ value: "spawnHealthPotion", weight: 35 }],
+    },
+    {
+        floor: 2,
+        weights: [{ value: "spawnConfusionScroll", weight: 10 }],
+    },
+    {
+        floor: 4,
+        weights: [{ value: "spawnLightningScroll", weight: 25 }],
+    },
+    {
+        floor: 6,
+        weights: [{ value: "spawnFireballScroll", weight: 25 }],
+    },
+];
+
+const MONSTER_CHANCES: WeightedChoices[] = [
+    {
+        floor: 0,
+        weights: [{ value: "spawnOrc", weight: 80 }],
+    },
+    {
+        floor: 3,
+        weights: [{ value: "spawnTroll", weight: 15 }],
+    },
+    {
+        floor: 5,
+        weights: [{ value: "spawnTroll", weight: 30 }],
+    },
+    {
+        floor: 7,
+        weights: [{ value: "spawnTroll", weight: 60 }],
+    },
+];
+
+type WeightMap = {
+    [key: string]: number;
+};
 
 class RectangularRoom {
     tiles: Tile[][];
@@ -74,14 +157,50 @@ export function generateRandomNumber(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function getWeights(
+    chancesByFloor: WeightedChoices[],
+    floorNumber: number
+): WeightMap {
+    let current: WeightMap = {};
+
+    for (let { floor, weights } of chancesByFloor) {
+        if (floor > floorNumber) break;
+
+        for (let { value, weight } of weights) {
+            current[value] = weight;
+        }
+    }
+
+    return current;
+}
+
+function getMaxValueForFloor(
+    maxValueByFloor: FloorValue,
+    floor: number
+): number {
+    let current = 0;
+
+    for (let [min, value] of maxValueByFloor) {
+        if (min > floor) break;
+        current = value;
+    }
+
+    return current;
+}
+
 function placeEntities(
     room: RectangularRoom,
     dungeon: GameMap,
-    maxMonsters: number,
-    maxItems: number
+    floorNumber: number
 ) {
-    const numberOfMonstersToAdd = generateRandomNumber(0, maxMonsters);
-    const numberOfItemsToAdd = generateRandomNumber(0, maxItems);
+    const numberOfMonstersToAdd = generateRandomNumber(
+        0,
+        getMaxValueForFloor(MAX_MONSTERS_BY_FLOOR, floorNumber)
+    );
+    const numberOfItemsToAdd = generateRandomNumber(
+        0,
+        getMaxValueForFloor(MAX_ITEMS_BY_FLOOR, floorNumber)
+    );
     const bounds = room.bounds;
 
     for (let i = 0; i < numberOfMonstersToAdd; i++) {
@@ -89,10 +208,10 @@ function placeEntities(
         const y = generateRandomNumber(bounds.y1 + 1, bounds.y2 - 1);
 
         if (!dungeon.entities.some((e) => e.x == x && e.y == y)) {
-            if (Math.random() < 0.8) {
-                spawnOrc(dungeon, x, y);
-            } else {
-                spawnTroll(dungeon, x, y);
+            const weights = getWeights(MONSTER_CHANCES, floorNumber);
+            const spawnType = RNG.getWeightedValue(weights);
+            if (spawnType) {
+                spawnMap[spawnType](dungeon, x, y);
             }
         }
     }
@@ -102,15 +221,11 @@ function placeEntities(
         const y = generateRandomNumber(bounds.y1 + 1, bounds.y2 - 1);
 
         if (!dungeon.entities.some((e) => e.x == x && e.y == y)) {
-            const itemChance = Math.random();
-            if (itemChance < 0.7) {
-                spawnHealthPotion(dungeon, x, y);
-            } else if (itemChance < 0.8) {
-                spawnFireballScroll(dungeon, x, y);
-            } else if (itemChance < 0.9) {
-                spawnConfusionScroll(dungeon, x, y);
-            } else {
-                spawnLightningScroll(dungeon, x, y);
+            const weights = getWeights(ITEM_CHANCES, floorNumber);
+            const spawnType = RNG.getWeightedValue(weights);
+
+            if (spawnType) {
+                spawnMap[spawnType](dungeon, x, y);
             }
         }
     }
@@ -154,14 +269,15 @@ export function generateDungeon(
     maxRooms: number,
     minSize: number,
     maxSize: number,
-    maxMonsters: number,
-    maxItems: number,
     player: Entity,
-    display: Display
+    display: Display,
+    currentFloor: number
 ): GameMap {
     const dungeon = new GameMap(mapWidth, mapHeight, display, [player]);
 
     const rooms: RectangularRoom[] = [];
+
+    let centerOfLastRoom: [number, number] = [0, 0];
 
     for (let count = 0; count < maxRooms; count++) {
         const width = generateRandomNumber(minSize, maxSize);
@@ -178,9 +294,11 @@ export function generateDungeon(
 
         dungeon.addRoom(x, y, newRoom.tiles);
 
-        placeEntities(newRoom, dungeon, maxMonsters, maxItems);
+        placeEntities(newRoom, dungeon, currentFloor);
 
         rooms.push(newRoom);
+
+        centerOfLastRoom = newRoom.center;
     }
 
     const startPoint = rooms[0].center;
@@ -195,6 +313,11 @@ export function generateDungeon(
             dungeon.tiles[tile[1]][tile[0]] = { ...FLOOR_TILE };
         }
     }
+
+    dungeon.tiles[centerOfLastRoom[1]][centerOfLastRoom[0]] = {
+        ...STAIRS_DOWN_TILE,
+    };
+    dungeon.downstairsLocation = centerOfLastRoom;
 
     return dungeon;
 }

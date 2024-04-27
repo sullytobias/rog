@@ -1,6 +1,6 @@
 import { Colors } from "../Colors/Colors";
 import { Entity, Actor, Item } from "../Entity/Entity";
-import { ImpossibleException } from "../Execptions/Exeptions";
+import { ImpossibleException } from "../Exeptions/Exeptions";
 import { GameMap } from "../Map/Map";
 
 export abstract class Action {
@@ -13,6 +13,23 @@ export abstract class ActionWithDirection extends Action {
     }
 
     abstract perform(entity: Entity, gameMap: GameMap): void;
+}
+
+export class TakeStairsAction extends Action {
+    perform(entity: Entity, gameMap: GameMap) {
+        if (
+            entity.x === gameMap.downstairsLocation[0] &&
+            entity.y == gameMap.downstairsLocation[1]
+        ) {
+            window.engine.screen.generateFloor();
+            window.messageLog.addMessage(
+                "You descend the staircase.",
+                Colors.Descend
+            );
+        } else {
+            throw new ImpossibleException("There are no stairs here.");
+        }
+    }
 }
 
 export class PickupAction extends Action {
