@@ -15,6 +15,7 @@ import {
     GameInputHandler,
     InputState,
 } from "../movement/handlerFunctions";
+import { ImpossibleException } from "../Execptions/Exeptions";
 import { Action } from "../movement/Actions";
 
 export class Engine {
@@ -123,34 +124,44 @@ export class Engine {
     update(event: KeyboardEvent) {
         const action = this.inputHandler.handleKeyboardInput(event);
 
-        if (action) {
+        if (action instanceof Action) {
             try {
                 action.perform(this.player);
                 this.handleEnemyTurns();
                 this.gameMap.updateFov(this.player);
-            } catch {}
+            } catch (error) {
+                if (error instanceof ImpossibleException) {
+                    this.messageLog.addMessage(
+                        error.message,
+                        Colors.Impossible
+                    );
+                }
+            }
+
+            this.inputHandler = this.inputHandler.nextHandler;
+
+            this.render();
         }
-
-        this.inputHandler = this.inputHandler.nextHandler;
-
-        this.render();
     }
 
     render() {
         this.display.clear();
         this.messageLog.render(this.display, 21, 45, 40, 5);
+
         renderHealthBar(
             this.display,
             this.player.fighter.hp,
             this.player.fighter.maxHp,
             20
         );
+
         renderNamesAtLocation(21, 44);
 
         this.gameMap.render();
 
         if (this.inputHandler.inputState === InputState.Log) {
             renderFrameWithTitle(3, 3, 74, 38, "Message History");
+
             this.messageLog.renderMessages(
                 this.display,
                 4,
@@ -160,11 +171,23 @@ export class Engine {
                 this.messageLog.messages.slice(0, this.logCursorPosition + 1)
             );
         }
+
         if (this.inputHandler.inputState === InputState.UseInventory) {
             this.renderInventory("Select an item to use");
         }
+
         if (this.inputHandler.inputState === InputState.DropInventory) {
             this.renderInventory("Select an item to drop");
         }
+
+        if (this.inputHandler.inputState === InputState.Target) {
+            const [x, y] = this.mousePosition;
+            const data = this.display._data[`${x},${y}`];
+            const char = data ? data[2] || " " : " ";
+
+            this.display.drawOver(x, y, char[0], "#000", "#fff");
+        }
+
+        this.inputHandler.onRender(this.display);
     }
 }

@@ -1,12 +1,15 @@
 import { Colors } from "../Colors/Colors";
 import { Entity, Actor, Item } from "../Entity/Entity";
+import { ImpossibleException } from "../Execptions/Exeptions";
 
 export abstract class Action {
     abstract perform(entity: Entity): void;
 }
 
-export abstract class ActionWithDirection implements Action {
-    constructor(public dx: number, public dy: number) {}
+export abstract class ActionWithDirection extends Action {
+    constructor(public dx: number, public dy: number) {
+        super();
+    }
 
     perform(_entity: Entity) {}
 }
@@ -21,11 +24,7 @@ export class PickupAction extends Action {
         for (const item of window.engine.gameMap.items) {
             if (x === item.x && y == item.y) {
                 if (inventory.items.length >= inventory.capacity) {
-                    window.engine.messageLog.addMessage(
-                        "Your inventory is full.",
-                        Colors.Impossible
-                    );
-                    throw new Error("Your inventory is full.");
+                    throw new ImpossibleException("Your inventory is full.");
                 }
 
                 window.engine.gameMap.removeEntity(item);
@@ -39,21 +38,28 @@ export class PickupAction extends Action {
             }
         }
 
-        window.engine.messageLog.addMessage(
-            "There is nothing here to pick up.",
-            Colors.Impossible
-        );
-        throw new Error("There is nothing here to pick up.");
+        throw new ImpossibleException("There is nothing here to pick up.");
     }
 }
 
 export class ItemAction extends Action {
-    constructor(public item: Item) {
+    constructor(
+        public item: Item | null,
+        public targetPosition: [number, number] | null = null
+    ) {
         super();
     }
 
     perform(entity: Entity) {
-        this.item.consumable.activate(this, entity);
+        this.item?.consumable.activate(this, entity);
+    }
+
+    public get targetActor(): Actor | undefined {
+        if (!this.targetPosition) {
+            return;
+        }
+        const [x, y] = this.targetPosition;
+        return window.engine.gameMap.getActorAtLocation(x, y);
     }
 }
 
@@ -67,26 +73,15 @@ export class MovementAction extends ActionWithDirection {
         const destY = entity.y + this.dy;
 
         if (!window.engine.gameMap.isInBounds(destX, destY)) {
-            window.engine.messageLog.addMessage(
-                "That way is blocked.",
-                Colors.Impossible
-            );
-            throw new Error("That way is blocked.");
+            throw new ImpossibleException("That way is blocked.");
         }
         if (!window.engine.gameMap.tiles[destY][destX].walkable) {
-            window.engine.messageLog.addMessage(
-                "That way is blocked.",
-                Colors.Impossible
-            );
-            throw new Error("That way is blocked.");
+            throw new ImpossibleException("That way is blocked.");
         }
         if (window.engine.gameMap.getBlockingEntityAtLocation(destX, destY)) {
-            window.engine.messageLog.addMessage(
-                "That way is blocked.",
-                Colors.Impossible
-            );
-            throw new Error("That way is blocked.");
+            throw new ImpossibleException("That way is blocked.");
         }
+
         entity.move(this.dx, this.dy);
     }
 }
@@ -111,11 +106,7 @@ export class MeleeAction extends ActionWithDirection {
 
         const target = window.engine.gameMap.getActorAtLocation(destX, destY);
         if (!target) {
-            window.engine.messageLog.addMessage(
-                "Nothing to attack",
-                Colors.Impossible
-            );
-            throw new Error("Nothing to attack.");
+            throw new ImpossibleException("Nothing to attack.");
         }
 
         const damage = actor.fighter.power - target.fighter.defense;
@@ -153,7 +144,9 @@ export class LogAction extends Action {
 export class DropItem extends ItemAction {
     perform(entity: Entity) {
         const dropper = entity as Actor;
-        if (!dropper) return;
+
+        if (!dropper || !this.item) return;
+
         dropper.inventory.drop(this.item);
     }
 }

@@ -32,6 +32,10 @@ export class Entity {
         return this.parent?.gameMap;
     }
 
+    distance(x: number, y: number) {
+        return Math.sqrt((x - this.x) ** 2 + (y - this.y) ** 2);
+    }
+
     place(x: number, y: number, gameMap: GameMap | undefined) {
         this.x = x;
         this.y = y;

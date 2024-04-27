@@ -1,4 +1,6 @@
+import { Display } from "rot-js";
 import { Colors } from "../Colors/Colors";
+import { Engine } from "../Engine/Engine";
 import {
     BumpAction,
     DropItem,
@@ -19,6 +21,8 @@ const LOG_KEYS: LogMap = {
 interface DirectionMap {
     [key: string]: [number, number];
 }
+
+type ActionCallback = (x: number, y: number) => Action | null;
 
 const MOVE_KEYS: DirectionMap = {
     // Arrow Keys
@@ -56,6 +60,7 @@ export enum InputState {
     Log,
     UseInventory,
     DropInventory,
+    Target,
 }
 
 export abstract class BaseInputHandler {
@@ -63,6 +68,8 @@ export abstract class BaseInputHandler {
     protected constructor(public inputState: InputState = InputState.Game) {
         this.nextHandler = this;
     }
+
+    onRender(_display: Display) {}
 
     abstract handleKeyboardInput(event: KeyboardEvent): Action | null;
 }
@@ -97,8 +104,63 @@ export class GameInputHandler extends BaseInputHandler {
                     InputState.DropInventory
                 );
             }
+            if (event.key === "/") {
+                this.nextHandler = new LookHandler();
+            }
         }
 
+        return null;
+    }
+}
+
+export abstract class SelectIndexHandler extends BaseInputHandler {
+    protected constructor() {
+        super(InputState.Target);
+        const { x, y } = window.engine.player;
+
+        window.engine.mousePosition = [x, y];
+    }
+
+    handleKeyboardInput(event: KeyboardEvent): Action | null {
+        if (event.key in MOVE_KEYS) {
+            const moveAmount = MOVE_KEYS[event.key];
+            let modifier = 1;
+
+            if (event.shiftKey) modifier = 5;
+            if (event.ctrlKey) modifier = 10;
+            if (event.altKey) modifier = 20;
+
+            let [x, y] = window.engine.mousePosition;
+            const [dx, dy] = moveAmount;
+
+            x += dx * modifier;
+            y += dy * modifier;
+            x = Math.max(0, Math.min(x, Engine.MAP_WIDTH - 1));
+            y = Math.max(0, Math.min(y, Engine.MAP_HEIGHT - 1));
+
+            window.engine.mousePosition = [x, y];
+
+            return null;
+        } else if (event.key === "Enter") {
+            let [x, y] = window.engine.mousePosition;
+            return this.onIndexSelected(x, y);
+        }
+
+        this.nextHandler = new GameInputHandler();
+
+        return null;
+    }
+
+    abstract onIndexSelected(x: number, y: number): Action | null;
+}
+
+export class LookHandler extends SelectIndexHandler {
+    constructor() {
+        super();
+    }
+
+    onIndexSelected(_x: number, _y: number): Action | null {
+        this.nextHandler = new GameInputHandler();
         return null;
     }
 }
@@ -112,6 +174,7 @@ export class LogInputHandler extends BaseInputHandler {
         if (event.key === "Home") {
             return new LogAction(() => (window.engine.logCursorPosition = 0));
         }
+
         if (event.key === "End") {
             return new LogAction(
                 () =>
@@ -161,8 +224,10 @@ export class InventoryInputHandler extends BaseInputHandler {
 
             if (index >= 0 && index <= 26) {
                 const item = window.engine.player.inventory.items[index];
+
                 if (item) {
                     this.nextHandler = new GameInputHandler();
+
                     if (this.inputState === InputState.UseInventory) {
                         return item.consumable.getAction();
                     } else if (this.inputState === InputState.DropInventory) {
@@ -173,11 +238,48 @@ export class InventoryInputHandler extends BaseInputHandler {
                         "Invalid entry.",
                         Colors.Invalid
                     );
+
                     return null;
                 }
             }
         }
         this.nextHandler = new GameInputHandler();
+
         return null;
+    }
+}
+
+export class SingleRangedAttackHandler extends SelectIndexHandler {
+    constructor(public callback: ActionCallback) {
+        super();
+    }
+
+    onIndexSelected(x: number, y: number): Action | null {
+        this.nextHandler = new GameInputHandler();
+        return this.callback(x, y);
+    }
+}
+
+export class AreaRangedAttackHandler extends SelectIndexHandler {
+    constructor(public radius: number, public callback: ActionCallback) {
+        super();
+    }
+
+    onRender(display: Display) {
+        const startX = window.engine.mousePosition[0] - this.radius - 1;
+        const startY = window.engine.mousePosition[1] - this.radius - 1;
+
+        for (let x = startX; x < startX + this.radius ** 2; x++) {
+            for (let y = startY; y < startY + this.radius ** 2; y++) {
+                const data = display._data[`${x},${y}`];
+                const char = data ? data[2] || " " : " ";
+                display.drawOver(x, y, char[0], "#fff", "#f00");
+            }
+        }
+    }
+
+    onIndexSelected(x: number, y: number): Action | null {
+        this.nextHandler = new GameInputHandler();
+        return this.callback(x, y);
     }
 }
