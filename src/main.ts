@@ -1,16 +1,20 @@
+import { Colors } from "./Colors/Colors";
 import { Engine } from "./Engine/Engine";
-import { spawnPlayer } from "./Entity/SpawnHelpers";
+import { MessageLog } from "./Ui/MessageLog";
 
 declare global {
     interface Window {
         engine: Engine;
+        messageLog: MessageLog;
     }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    window.engine = new Engine(
-        spawnPlayer(Engine.WIDTH / 2, Engine.HEIGHT / 2)
+    window.messageLog = new MessageLog();
+    window.engine = new Engine();
+    window.messageLog.addMessage(
+        "Hello and welcome, adventurer, to yet another dungeon!",
+        Colors.WelcomeText
     );
-    
-    window.engine.render();
+    window.engine.screen.render();
 });

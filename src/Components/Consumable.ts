@@ -1,19 +1,17 @@
 import { Colors } from "../Colors/Colors";
 import { Actor, Entity, Item } from "../Entity/Entity";
 import { ImpossibleException } from "../Execptions/Exeptions";
-import { ItemAction } from "../movement/Actions";
+import { GameMap } from "../Map/Map";
+import { Action, ItemAction } from "../movement/Actions";
 import {
     AreaRangedAttackHandler,
     SingleRangedAttackHandler,
 } from "../movement/handlerFunctions";
-import { Action } from "../movement/interfaces";
 import { ConfusedEnemy } from "./Ai";
 import { Inventory } from "./Inventory";
 
 export abstract class Consumable {
     protected constructor(public parent: Item | null) {}
-
-    abstract activate(action: ItemAction, entity: Entity): void;
 
     getAction(): Action | null {
         if (this.parent) {
@@ -21,6 +19,12 @@ export abstract class Consumable {
         }
         return null;
     }
+
+    abstract activate(
+        action: ItemAction,
+        entity: Entity,
+        gameMap: GameMap
+    ): void;
 
     consume() {
         const item = this.parent;
@@ -66,7 +70,7 @@ export class HealingConsumable implements Consumable {
 
         const amountRecovered = consumer.fighter.heal(this.amount);
         if (amountRecovered > 0) {
-            window.engine.messageLog.addMessage(
+            window.messageLog.addMessage(
                 `You consume the ${this.parent?.name}, and recover ${amountRecovered} HP!`,
                 Colors.HealthRecovered
             );
@@ -86,14 +90,14 @@ export class LightningConsumable extends Consumable {
         super(parent);
     }
 
-    activate(_action: ItemAction, entity: Entity) {
+    activate(_action: ItemAction, entity: Entity, gameMap: GameMap) {
         let target: Actor | null = null;
         let closestDistance = this.maxRange + 1.0;
 
-        for (const actor of window.engine.gameMap.actors) {
+        for (const actor of gameMap.actors) {
             if (
                 !Object.is(actor, entity) &&
-                window.engine.gameMap.tiles[actor.y][actor.x].visible
+                gameMap.tiles[actor.y][actor.x].visible
             ) {
                 const distance = entity.distance(actor.x, actor.y);
                 if (distance < closestDistance) {
@@ -104,15 +108,13 @@ export class LightningConsumable extends Consumable {
         }
 
         if (target) {
-            window.engine.messageLog.addMessage(
+            window.messageLog.addMessage(
                 `A lightning bolt strikes the ${target.name} with a loud thunder, for ${this.damage} damage!`
             );
             target.fighter.takeDamage(this.damage);
             this.consume();
         } else {
-            window.engine.messageLog.addMessage(
-                "No enemy is close enough to strike."
-            );
+            window.messageLog.addMessage("No enemy is close enough to strike.");
             throw new ImpossibleException(
                 "No enemy is close enough to strike."
             );
@@ -126,27 +128,27 @@ export class ConfusionConsumable extends Consumable {
     }
 
     getAction(): Action | null {
-        window.engine.messageLog.addMessage(
+        window.messageLog.addMessage(
             "Select a target location.",
             Colors.NeedsTarget
         );
-
-        window.engine.inputHandler = new SingleRangedAttackHandler((x, y) => {
-            return new ItemAction(this.parent, [x, y]);
-        });
-
+        window.engine.screen.inputHandler = new SingleRangedAttackHandler(
+            (x, y) => {
+                return new ItemAction(this.parent, [x, y]);
+            }
+        );
         return null;
     }
 
-    activate(action: ItemAction, entity: Entity) {
-        const target = action.targetActor;
+    activate(action: ItemAction, entity: Entity, gameMap: GameMap) {
+        const target = action.targetActor(gameMap);
 
         if (!target) {
             throw new ImpossibleException(
                 "You must select an enemy to target."
             );
         }
-        if (!window.engine.gameMap.tiles[target.y][target.x].visible) {
+        if (!gameMap.tiles[target.y][target.x].visible) {
             throw new ImpossibleException(
                 "You cannot target an area you cannot see."
             );
@@ -155,7 +157,7 @@ export class ConfusionConsumable extends Consumable {
             throw new ImpossibleException("You cannot confuse yourself!");
         }
 
-        window.engine.messageLog.addMessage(
+        window.messageLog.addMessage(
             `The eyes of the ${target.name} look vacant, as it starts to stumble around!`,
             Colors.StatusEffectApplied
         );
@@ -175,11 +177,11 @@ export class FireballDamageConsumable extends Consumable {
     }
 
     getAction(): Action | null {
-        window.engine.messageLog.addMessage(
+        window.messageLog.addMessage(
             "Select a target location.",
             Colors.NeedsTarget
         );
-        window.engine.inputHandler = new AreaRangedAttackHandler(
+        window.engine.screen.inputHandler = new AreaRangedAttackHandler(
             this.radius,
             (x, y) => {
                 return new ItemAction(this.parent, [x, y]);
@@ -188,29 +190,28 @@ export class FireballDamageConsumable extends Consumable {
         return null;
     }
 
-    activate(action: ItemAction, _entity: Entity) {
+    activate(action: ItemAction, _entity: Entity, gameMap: GameMap) {
         const { targetPosition } = action;
 
         if (!targetPosition) {
             throw new ImpossibleException("You must select an area to target.");
         }
         const [x, y] = targetPosition;
-        if (!window.engine.gameMap.tiles[y][x].visible) {
+        if (!gameMap.tiles[y][x].visible) {
             throw new ImpossibleException(
                 "You cannot target an area that you cannot see."
             );
         }
 
         let targetsHit = false;
-        for (let actor of window.engine.gameMap.actors) {
+        for (let actor of gameMap.actors) {
             if (actor.distance(x, y) <= this.radius) {
-                window.engine.messageLog.addMessage(
+                window.messageLog.addMessage(
                     `The ${actor.name} is engulfed in a fiery explosion, taking ${this.damage} damage!`
                 );
                 actor.fighter.takeDamage(this.damage);
                 targetsHit = true;
             }
-
             if (!targetsHit) {
                 throw new ImpossibleException(
                     "There are no targets in the radius."

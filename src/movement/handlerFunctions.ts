@@ -2,13 +2,13 @@ import { Display } from "rot-js";
 import { Colors } from "../Colors/Colors";
 import { Engine } from "../Engine/Engine";
 import {
+    Action,
     BumpAction,
     DropItem,
     LogAction,
     PickupAction,
     WaitAction,
 } from "./Actions";
-import { Action } from "./interfaces";
 
 interface LogMap {
     [key: string]: number;
@@ -65,8 +65,17 @@ export enum InputState {
 
 export abstract class BaseInputHandler {
     nextHandler: BaseInputHandler;
+    mousePosition: [number, number];
+    logCursorPosition: number;
+
     protected constructor(public inputState: InputState = InputState.Game) {
         this.nextHandler = this;
+        this.mousePosition = [0, 0];
+        this.logCursorPosition = window.messageLog.messages.length - 1;
+    }
+
+    handleMouseMovement(position: [number, number]) {
+        this.mousePosition = position;
     }
 
     onRender(_display: Display) {}
@@ -117,37 +126,31 @@ export abstract class SelectIndexHandler extends BaseInputHandler {
     protected constructor() {
         super(InputState.Target);
         const { x, y } = window.engine.player;
-
-        window.engine.mousePosition = [x, y];
+        this.mousePosition = [x, y];
     }
 
     handleKeyboardInput(event: KeyboardEvent): Action | null {
         if (event.key in MOVE_KEYS) {
             const moveAmount = MOVE_KEYS[event.key];
             let modifier = 1;
-
             if (event.shiftKey) modifier = 5;
             if (event.ctrlKey) modifier = 10;
             if (event.altKey) modifier = 20;
 
-            let [x, y] = window.engine.mousePosition;
+            let [x, y] = this.mousePosition;
             const [dx, dy] = moveAmount;
-
             x += dx * modifier;
             y += dy * modifier;
             x = Math.max(0, Math.min(x, Engine.MAP_WIDTH - 1));
             y = Math.max(0, Math.min(y, Engine.MAP_HEIGHT - 1));
-
-            window.engine.mousePosition = [x, y];
-
+            this.mousePosition = [x, y];
             return null;
         } else if (event.key === "Enter") {
-            let [x, y] = window.engine.mousePosition;
+            let [x, y] = this.mousePosition;
             return this.onIndexSelected(x, y);
         }
 
         this.nextHandler = new GameInputHandler();
-
         return null;
     }
 
@@ -172,39 +175,35 @@ export class LogInputHandler extends BaseInputHandler {
 
     handleKeyboardInput(event: KeyboardEvent): Action | null {
         if (event.key === "Home") {
-            return new LogAction(() => (window.engine.logCursorPosition = 0));
+            return new LogAction(() => (this.logCursorPosition = 0));
         }
-
         if (event.key === "End") {
             return new LogAction(
                 () =>
-                    (window.engine.logCursorPosition =
-                        window.engine.messageLog.messages.length - 1)
+                    (this.logCursorPosition =
+                        window.messageLog.messages.length - 1)
             );
         }
 
         const scrollAmount = LOG_KEYS[event.key];
-
         if (!scrollAmount) {
             this.nextHandler = new GameInputHandler();
         }
 
         return new LogAction(() => {
-            if (scrollAmount < 0 && window.engine.logCursorPosition === 0) {
-                window.engine.logCursorPosition =
-                    window.engine.messageLog.messages.length - 1;
+            if (scrollAmount < 0 && this.logCursorPosition === 0) {
+                this.logCursorPosition = window.messageLog.messages.length - 1;
             } else if (
                 scrollAmount > 0 &&
-                window.engine.logCursorPosition ===
-                    window.engine.messageLog.messages.length - 1
+                this.logCursorPosition === window.messageLog.messages.length - 1
             ) {
-                window.engine.logCursorPosition = 0;
+                this.logCursorPosition = 0;
             } else {
-                window.engine.logCursorPosition = Math.max(
+                this.logCursorPosition = Math.max(
                     0,
                     Math.min(
-                        window.engine.logCursorPosition + scrollAmount,
-                        window.engine.messageLog.messages.length - 1
+                        this.logCursorPosition + scrollAmount,
+                        window.messageLog.messages.length - 1
                     )
                 );
             }
@@ -234,7 +233,7 @@ export class InventoryInputHandler extends BaseInputHandler {
                         return new DropItem(item);
                     }
                 } else {
-                    window.engine.messageLog.addMessage(
+                    window.messageLog.addMessage(
                         "Invalid entry.",
                         Colors.Invalid
                     );
@@ -266,14 +265,12 @@ export class AreaRangedAttackHandler extends SelectIndexHandler {
     }
 
     onRender(display: Display) {
-        const startX = window.engine.mousePosition[0] - this.radius - 1;
-        const startY = window.engine.mousePosition[1] - this.radius - 1;
+        const startX = this.mousePosition[0] - this.radius - 1;
+        const startY = this.mousePosition[1] - this.radius - 1;
 
         for (let x = startX; x < startX + this.radius ** 2; x++) {
             for (let y = startY; y < startY + this.radius ** 2; y++) {
-                const data = display._data[`${x},${y}`];
-                const char = data ? data[2] || " " : " ";
-                display.drawOver(x, y, char[0], "#fff", "#f00");
+                display.drawOver(x, y, null, "#fff", "#f00");
             }
         }
     }

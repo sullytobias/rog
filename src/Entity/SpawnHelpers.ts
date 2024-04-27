@@ -8,7 +8,7 @@ import {
 import { Fighter } from "../Components/Fighter";
 import { Inventory } from "../Components/Inventory";
 import { GameMap } from "../Map/Map";
-import { Actor, Entity, Item } from "./Entity";
+import { Actor, Item } from "./Entity";
 
 export function spawnPlayer(
     x: number,
@@ -29,7 +29,7 @@ export function spawnPlayer(
     );
 }
 
-export function spawnOrc(gameMap: GameMap, x: number, y: number): Entity {
+export function spawnOrc(gameMap: GameMap, x: number, y: number): Actor {
     return new Actor(
         x,
         y,
@@ -44,7 +44,7 @@ export function spawnOrc(gameMap: GameMap, x: number, y: number): Entity {
     );
 }
 
-export function spawnTroll(gameMap: GameMap, x: number, y: number): Entity {
+export function spawnTroll(gameMap: GameMap, x: number, y: number): Actor {
     return new Actor(
         x,
         y,
@@ -63,7 +63,7 @@ export function spawnHealthPotion(
     gameMap: GameMap,
     x: number,
     y: number
-): Entity {
+): Item {
     return new Item(
         x,
         y,
@@ -76,7 +76,11 @@ export function spawnHealthPotion(
     );
 }
 
-export function spawnLightningScroll(gameMap: GameMap, x: number, y: number) {
+export function spawnLightningScroll(
+    gameMap: GameMap,
+    x: number,
+    y: number
+): Item {
     return new Item(
         x,
         y,
@@ -89,7 +93,11 @@ export function spawnLightningScroll(gameMap: GameMap, x: number, y: number) {
     );
 }
 
-export function spawnConfusionScroll(gameMap: GameMap, x: number, y: number) {
+export function spawnConfusionScroll(
+    gameMap: GameMap,
+    x: number,
+    y: number
+): Item {
     return new Item(
         x,
         y,
@@ -102,7 +110,11 @@ export function spawnConfusionScroll(gameMap: GameMap, x: number, y: number) {
     );
 }
 
-export function spawnFireballScroll(gameMap: GameMap, x: number, y: number) {
+export function spawnFireballScroll(
+    gameMap: GameMap,
+    x: number,
+    y: number
+): Item {
     return new Item(
         x,
         y,

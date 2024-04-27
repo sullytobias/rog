@@ -1,14 +1,15 @@
 import * as ROT from "rot-js";
 
 import { Actor, Entity } from "../Entity/Entity";
-import { Action } from "../movement/interfaces";
 import {
+    Action,
     BumpAction,
     MeleeAction,
     MovementAction,
     WaitAction,
 } from "../movement/Actions";
 import { generateRandomNumber } from "../Map/Generation/Generation";
+import { GameMap } from "../Map/Map";
 
 export abstract class Ai implements Action {
     path: [number, number][];
@@ -17,20 +18,16 @@ export abstract class Ai implements Action {
         this.path = [];
     }
 
-    abstract perform(entity: Entity): void;
+    abstract perform(entity: Entity, gameMap: GameMap): void;
 
-    /**
-     * Compute and return a path to the target position.
-     *
-     * If there is no valid path then return an empty list.
-     *
-     * @param destX
-     * @param destY
-     * @param entity
-     */
-    calculatePathTo(destX: number, destY: number, entity: Entity) {
+    calculatePathTo(
+        destX: number,
+        destY: number,
+        entity: Entity,
+        gameMap: GameMap
+    ) {
         const isPassable = (x: number, y: number) =>
-            window.engine.gameMap.tiles[y][x].walkable;
+            gameMap.tiles[y][x].walkable;
         const dijkstra = new ROT.Path.Dijkstra(destX, destY, isPassable, {});
 
         this.path = [];
@@ -48,31 +45,29 @@ export class HostileEnemy extends Ai {
         super();
     }
 
-    perform(entity: Entity) {
+    perform(entity: Entity, gameMap: GameMap) {
         const target = window.engine.player;
-
         const dx = target.x - entity.x;
         const dy = target.y - entity.y;
-
         const distance = Math.max(Math.abs(dx), Math.abs(dy));
 
-        if (window.engine.gameMap.tiles[entity.y][entity.x].visible) {
+        if (gameMap.tiles[entity.y][entity.x].visible) {
             if (distance <= 1) {
-                return new MeleeAction(dx, dy).perform(entity as Actor);
+                return new MeleeAction(dx, dy).perform(
+                    entity as Actor,
+                    gameMap
+                );
             }
-
-            this.calculatePathTo(target.x, target.y, entity);
+            this.calculatePathTo(target.x, target.y, entity, gameMap);
         }
 
         if (this.path.length > 0) {
             const [destX, destY] = this.path[0];
-
             this.path.shift();
-
             return new MovementAction(
                 destX - entity.x,
                 destY - entity.y
-            ).perform(entity);
+            ).perform(entity, gameMap);
         }
 
         return new WaitAction().perform(entity);
@@ -95,23 +90,21 @@ export class ConfusedEnemy extends Ai {
         super();
     }
 
-    perform(entity: Entity) {
+    perform(entity: Entity, gameMap: GameMap) {
         const actor = entity as Actor;
         if (!actor) return;
 
         if (this.turnsRemaining <= 0) {
-            window.engine.messageLog.addMessage(
+            window.messageLog.addMessage(
                 `The ${entity.name} is no longer confused.`
             );
-
             actor.ai = this.previousAi;
         } else {
             const [directionX, directionY] =
                 directions[generateRandomNumber(0, directions.length)];
             this.turnsRemaining -= 1;
-
             const action = new BumpAction(directionX, directionY);
-            action.perform(entity);
+            action.perform(entity, gameMap);
         }
     }
 }
