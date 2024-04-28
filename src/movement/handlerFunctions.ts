@@ -5,6 +5,7 @@ import {
     Action,
     BumpAction,
     DropItem,
+    EquipAction,
     LogAction,
     PickupAction,
     TakeStairsAction,
@@ -336,6 +337,33 @@ export class InventoryInputHandler extends BaseInputHandler {
         super(inputState);
     }
 
+    onRender(display: Display) {
+        const title =
+            this.inputState === InputState.UseInventory
+                ? "Select an item to use"
+                : "Select an item to drop";
+        const itemCount = window.engine.player.inventory.items.length;
+        const height = itemCount + 2 <= 3 ? 3 : itemCount + 2;
+        const width = title.length + 4;
+        const x = window.engine.player.x <= 30 ? 40 : 0;
+        const y = 0;
+
+        renderFrameWithTitle(x, y, width, height, title);
+
+        if (itemCount > 0) {
+            window.engine.player.inventory.items.forEach((i, index) => {
+                const key = String.fromCharCode("a".charCodeAt(0) + index);
+                const isEquipped =
+                    window.engine.player.equipment.itemIsEquipped(i);
+                let itemString = `(${key}) ${i.name}`;
+                itemString = isEquipped ? `${itemString} (E)` : itemString;
+                display.drawText(x + 1, y + index + 1, itemString);
+            });
+        } else {
+            display.drawText(x + 1, y + 1, "(Empty)");
+        }
+    }
+
     handleKeyboardInput(event: KeyboardEvent): Action | null {
         if (event.key.length === 1) {
             const ordinal = event.key.charCodeAt(0);
@@ -346,9 +374,13 @@ export class InventoryInputHandler extends BaseInputHandler {
 
                 if (item) {
                     this.nextHandler = new GameInputHandler();
-
                     if (this.inputState === InputState.UseInventory) {
-                        return item.consumable.getAction();
+                        if (item.consumable) {
+                            return item.consumable.getAction();
+                        } else if (item.equippable) {
+                            return new EquipAction(item);
+                        }
+                        return null;
                     } else if (this.inputState === InputState.DropInventory) {
                         return new DropItem(item);
                     }
@@ -357,13 +389,11 @@ export class InventoryInputHandler extends BaseInputHandler {
                         "Invalid entry.",
                         Colors.Invalid
                     );
-
                     return null;
                 }
             }
         }
         this.nextHandler = new GameInputHandler();
-
         return null;
     }
 }

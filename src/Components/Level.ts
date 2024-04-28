@@ -57,22 +57,22 @@ export class Level extends Base {
 
         if (!actor) return;
 
-        actor.fighter.power += amount;
+        actor.fighter.basePower += amount;
 
         window.messageLog.addMessage("You feel stronger!");
 
         this.increaseLevel();
     }
+      
+      increaseDefense(amount: number = 1) {
+          const actor = this.parent as Actor;
 
-    increaseDefense(amount: number = 1) {
-        const actor = this.parent as Actor;
+          if (!actor) return;
 
-        if (!actor) return;
+          actor.fighter.baseDefense += amount;
 
-        actor.fighter.defense += amount;
+          window.messageLog.addMessage("Your movements are getting swifter!");
 
-        window.messageLog.addMessage("Your movements are getting swifter!");
-
-        this.increaseLevel();
-    }
+          this.increaseLevel();
+      }
 }

@@ -5,6 +5,13 @@ import {
     HealingConsumable,
     LightningConsumable,
 } from "../Components/Consumable";
+import { Equipment } from "../Components/Equipment";
+import {
+    Dagger,
+    Sword,
+    LeatherArmor,
+    ChainMail,
+} from "../Components/Equippable";
 import { Fighter } from "../Components/Fighter";
 import { Inventory } from "../Components/Inventory";
 import { Level } from "../Components/Level";
@@ -24,12 +31,12 @@ export function spawnPlayer(
         "#000",
         "Player",
         null,
-        new Fighter(30, 2, 5),
+        new Equipment(),
+        new Fighter(30, 1, 2),
         new Inventory(26),
-        new Level(20),
+        new Level(200),
         gameMap
     );
-
     player.level.parent = player;
     return player;
 }
@@ -43,6 +50,7 @@ export function spawnOrc(gameMap: GameMap, x: number, y: number): Actor {
         "#000",
         "Orc",
         new HostileEnemy(),
+        new Equipment(),
         new Fighter(10, 0, 3),
         new Inventory(0),
         new Level(0, 35),
@@ -59,6 +67,7 @@ export function spawnTroll(gameMap: GameMap, x: number, y: number): Actor {
         "#000",
         "Troll",
         new HostileEnemy(),
+        new Equipment(),
         new Fighter(16, 1, 4),
         new Inventory(0),
         new Level(0, 100),
@@ -79,6 +88,7 @@ export function spawnHealthPotion(
         "#000",
         "Health Potion",
         new HealingConsumable(4),
+        null,
         gameMap
     );
 }
@@ -96,6 +106,7 @@ export function spawnLightningScroll(
         "#000",
         "Lightning Scroll",
         new LightningConsumable(20, 5),
+        null,
         gameMap
     );
 }
@@ -113,6 +124,7 @@ export function spawnConfusionScroll(
         "#000",
         "Confusion Scroll",
         new ConfusionConsumable(10),
+        null,
         gameMap
     );
 }
@@ -130,7 +142,67 @@ export function spawnFireballScroll(
         "#000",
         "Fireball Scroll",
         new FireballDamageConsumable(12, 3),
+        null,
         gameMap
     );
 }
 
+export function spawnDagger(gameMap: GameMap, x: number, y: number): Item {
+    return new Item(
+        x,
+        y,
+        "/",
+        "#00bfff",
+        "#000",
+        "Dagger",
+        null,
+        new Dagger(),
+        gameMap
+    );
+}
+
+export function spawnSword(gameMap: GameMap, x: number, y: number): Item {
+    return new Item(
+        x,
+        y,
+        "/",
+        "#00bfff",
+        "#000",
+        "Sword",
+        null,
+        new Sword(),
+        gameMap
+    );
+}
+
+export function spawnLeatherArmor(
+    gameMap: GameMap,
+    x: number,
+    y: number
+): Item {
+    return new Item(
+        x,
+        y,
+        "[",
+        "#8b4513",
+        "#000",
+        "Leather Armor",
+        null,
+        new LeatherArmor(),
+        gameMap
+    );
+}
+
+export function spawnChainMail(gameMap: GameMap, x: number, y: number): Item {
+    return new Item(
+        x,
+        y,
+        "[",
+        "#8b4513",
+        "#000",
+        "Chain Mail",
+        null,
+        new ChainMail(),
+        gameMap
+    );
+}

@@ -9,11 +9,15 @@ import { GameMap } from "../Map";
 import { Entity } from "../../Entity/Entity";
 import { Bounds } from "./interfaces";
 import {
+    spawnChainMail,
     spawnConfusionScroll,
+    spawnDagger,
     spawnFireballScroll,
     spawnHealthPotion,
+    spawnLeatherArmor,
     spawnLightningScroll,
     spawnOrc,
+    spawnSword,
     spawnTroll,
 } from "../../Entity/SpawnHelpers";
 
@@ -41,7 +45,11 @@ export const spawnMap: SPAWNMAP = {
     spawnConfusionScroll,
     spawnLightningScroll,
     spawnFireballScroll,
-};
+    spawnDagger,
+    spawnSword,
+    spawnLeatherArmor,
+    spawnChainMail,
+}; 
 
 type Choice = {
     value: string;
@@ -64,11 +72,17 @@ const ITEM_CHANCES: WeightedChoices[] = [
     },
     {
         floor: 4,
-        weights: [{ value: "spawnLightningScroll", weight: 25 }],
+        weights: [
+            { value: "spawnLightningScroll", weight: 25 },
+            { value: "spawnSword", weight: 5 },
+        ],
     },
     {
         floor: 6,
-        weights: [{ value: "spawnFireballScroll", weight: 25 }],
+        weights: [
+            { value: "spawnFireballScroll", weight: 25 },
+            { value: "spawnChainMail", weight: 15 },
+        ],
     },
 ];
 

@@ -1,6 +1,8 @@
 import { Ai } from "../Components/Ai";
 import { Base } from "../Components/Base";
 import { Consumable } from "../Components/Consumable";
+import { Equipment } from "../Components/Equipment";
+import { Equippable } from "../Components/Equippable";
 import { Fighter } from "../Components/Fighter";
 import { Inventory } from "../Components/Inventory";
 import { Level } from "../Components/Level";
@@ -68,6 +70,7 @@ export class Actor extends Entity {
         public bg: string = "#000",
         public name: string = "<Unnamed>",
         public ai: Ai | null,
+        public equipment: Equipment,
         public fighter: Fighter,
         public inventory: Inventory,
         public level: Level,
@@ -75,6 +78,7 @@ export class Actor extends Entity {
     ) {
         super(x, y, char, fg, bg, name, true, RenderOrder.Actor, parent);
         this.fighter.parent = this;
+        this.equipment.parent = this;
         this.inventory.parent = this;
     }
 
@@ -91,11 +95,18 @@ export class Item extends Entity {
         public fg: string = "#fff",
         public bg: string = "#000",
         public name: string = "<Unnamed>",
-        public consumable: Consumable,
+        public consumable: Consumable | null = null,
+        public equippable: Equippable | null = null,
         public parent: GameMap | Base | null = null
     ) {
         super(x, y, char, fg, bg, name, false, RenderOrder.Item, parent);
-        this.consumable.parent = this;
+        if (this.consumable) {
+            this.consumable.parent = this;
+        }
+
+        if (this.equippable) {
+            this.equippable.parent = this;
+        }
     }
 }
 

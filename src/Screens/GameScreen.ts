@@ -19,12 +19,16 @@ import { BaseScreen } from "./Base";
 import { Tile } from "../Tiles/Tile-types";
 import { HostileEnemy, ConfusedEnemy } from "../Components/Ai";
 import {
+    spawnChainMail,
     spawnConfusionScroll,
+    spawnDagger,
     spawnFireballScroll,
     spawnHealthPotion,
+    spawnLeatherArmor,
     spawnLightningScroll,
     spawnOrc,
     spawnPlayer,
+    spawnSword,
     spawnTroll,
 } from "../Entity/SpawnHelpers";
 
@@ -98,6 +102,21 @@ export class GameScreen extends BaseScreen {
             this.currentFloor = floor;
         } else {
             this.generateFloor();
+            const dagger = spawnDagger(this.gameMap, 0, 0);
+
+            dagger.parent = this.player.inventory;
+
+            this.player.inventory.items.push(dagger);
+            this.player.equipment.toggleEquip(dagger, false);
+            this.gameMap.removeEntity(dagger);
+
+            const leatherArmor = spawnLeatherArmor(this.gameMap, 0, 0);
+
+            leatherArmor.parent = this.player.inventory;
+
+            this.player.inventory.items.push(leatherArmor);
+            this.player.equipment.toggleEquip(leatherArmor, false);
+            this.gameMap.removeEntity(leatherArmor);
         }
 
         this.inputHandler = new GameInputHandler();
@@ -222,6 +241,22 @@ export class GameScreen extends BaseScreen {
                     item = spawnFireballScroll(map, 0, 0);
                     break;
                 }
+                case "Dagger": {
+                    item = spawnDagger(map, 0, 0);
+                    break;
+                }
+                case "Sword": {
+                    item = spawnSword(map, 0, 0);
+                    break;
+                }
+                case "Leather Armor": {
+                    item = spawnLeatherArmor(map, 0, 0);
+                    break;
+                }
+                case "Chain Mail": {
+                    item = spawnChainMail(map, 0, 0);
+                    break;
+                }
             }
 
             if (item) {
@@ -258,6 +293,14 @@ export class GameScreen extends BaseScreen {
                 spawnConfusionScroll(map, e.x, e.y);
             } else if (e.name === "Fireball Scroll") {
                 spawnFireballScroll(map, e.x, e.y);
+            } else if (e.name === "Dagger") {
+                spawnDagger(map, e.x, e.y);
+            } else if (e.name === "Sword") {
+                spawnSword(map, e.x, e.y);
+            } else if (e.name === "Leather Armor") {
+                spawnLeatherArmor(map, e.x, e.y);
+            } else if (e.name === "Chain Mail") {
+                spawnChainMail(map, e.x, e.y);
             }
         }
 
@@ -353,12 +396,7 @@ export class GameScreen extends BaseScreen {
                 )
             );
         }
-        if (this.inputHandler.inputState === InputState.UseInventory) {
-            this.renderInventory("Select an item to use");
-        }
-        if (this.inputHandler.inputState === InputState.DropInventory) {
-            this.renderInventory("Select an item to drop");
-        }
+
         if (this.inputHandler.inputState === InputState.Target) {
             const [x, y] = this.inputHandler.mousePosition;
             this.display.drawOver(x, y, null, "#000", "#fff");
