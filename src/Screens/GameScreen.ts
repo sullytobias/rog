@@ -210,8 +210,12 @@ export class GameScreen extends BaseScreen {
         const player = spawnPlayer(playerEntity.x, playerEntity.y);
 
         player.fighter.hp = playerEntity.fighter?.hp || player.fighter.hp;
-        player.level.currentLevel = playerEntity.level?.currentLevel;
-        player.level.currentXp = playerEntity.level?.currentXp;
+        player.level.currentLevel = playerEntity.level
+            ? playerEntity.level.currentLevel
+            : 0;
+        player.level.currentXp = playerEntity.level
+            ? playerEntity.level.currentXp
+            : 0;
         window.engine.player = player;
 
         const map = new GameMap(parsedMap.width, parsedMap.height, display, [
