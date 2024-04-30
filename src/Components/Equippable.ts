@@ -1,4 +1,4 @@
-import { Item } from "../Entity/Entity";
+import { Item } from "../Entity/Item";
 import { EquipmentType } from "../Equipment/Equipment-types";
 import { Base } from "./Base";
 

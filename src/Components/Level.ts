@@ -1,4 +1,4 @@
-import { Actor } from "../Entity/Entity";
+import { Actor } from "../Entity/Actor";
 import { Base } from "./Base";
 
 export class Level extends Base {
@@ -63,16 +63,16 @@ export class Level extends Base {
 
         this.increaseLevel();
     }
-      
-      increaseDefense(amount: number = 1) {
-          const actor = this.parent as Actor;
 
-          if (!actor) return;
+    increaseDefense(amount: number = 1) {
+        const actor = this.parent as Actor;
 
-          actor.fighter.baseDefense += amount;
+        if (!actor) return;
 
-          window.messageLog.addMessage("Your movements are getting swifter!");
+        actor.fighter.baseDefense += amount;
 
-          this.increaseLevel();
-      }
+        window.messageLog.addMessage("Your movements are getting swifter!");
+
+        this.increaseLevel();
+    }
 }

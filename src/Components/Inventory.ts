@@ -1,4 +1,5 @@
-import { Actor, Item } from "../Entity/Entity";
+import { Actor } from "../Entity/Actor";
+import { Item } from "../Entity/Item";
 import { GameMap } from "../Map/Map";
 import { Base } from "./Base";
 

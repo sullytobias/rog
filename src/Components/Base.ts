@@ -1,8 +1,8 @@
-import { Entity } from "../Entity/Entity";
+import { Base as BaseEntity } from "../Entity/Base";
 import { GameMap } from "../Map/Map";
 
 export abstract class Base {
-    parent: Entity | null;
+    parent: BaseEntity | null;
 
     protected constructor() {
         this.parent = null;

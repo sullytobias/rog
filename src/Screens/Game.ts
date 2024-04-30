@@ -1,36 +1,35 @@
 import { Display } from "rot-js";
 import { Colors } from "../Colors/Colors";
-import { Actor, Item } from "../Entity/Entity";
-import { ImpossibleException } from "../Exeptions/Exeptions";
+import { ImpossibleException } from "../Exeptions/ImpossibleException";
 import { generateDungeon } from "../Map/Generation/Generation";
 import { GameMap } from "../Map/Map";
-import { Action } from "../movement/Actions";
+import { Action } from "../Movement/Actions";
 import {
     BaseInputHandler,
     GameInputHandler,
     InputState,
-} from "../movement/handlerFunctions";
+} from "../Movement/Handlers";
 import {
     renderHealthBar,
     renderNamesAtLocation,
     renderFrameWithTitle,
 } from "../Ui/Render";
-import { BaseScreen } from "./Base";
+import { Base } from "./Base";
 import { Tile } from "../Tiles/Tile-types";
 import { HostileEnemy, ConfusedEnemy } from "../Components/Ai";
-import {
-    spawnChainMail,
-    spawnConfusionScroll,
-    spawnDagger,
-    spawnFireballScroll,
-    spawnHealthPotion,
-    spawnLeatherArmor,
-    spawnLightningScroll,
-    spawnOrc,
-    spawnPlayer,
-    spawnSword,
-    spawnTroll,
-} from "../Entity/SpawnHelpers";
+import { spawnOrc } from "../Entity/Spawns/Actors/Orc";
+import { spawnPlayer } from "../Entity/Spawns/Actors/Player";
+import { spawnTroll } from "../Entity/Spawns/Actors/Troll";
+import { spawnChainMail } from "../Entity/Spawns/Items/Armor/ChainMail";
+import { spawnLeatherArmor } from "../Entity/Spawns/Items/Armor/LeatherArmor";
+import { spawnHealthPotion } from "../Entity/Spawns/Items/Potions/HealthPotion";
+import { spawnConfusionScroll } from "../Entity/Spawns/Items/Scroll/ConfusionScroll";
+import { spawnFireballScroll } from "../Entity/Spawns/Items/Scroll/FireballScroll";
+import { spawnLightningScroll } from "../Entity/Spawns/Items/Scroll/LightningScroll";
+import { spawnDagger } from "../Entity/Spawns/Items/Weapons/Dagger";
+import { spawnSword } from "../Entity/Spawns/Items/Weapons/Sword";
+import { Actor } from "../Entity/Actor";
+import { Item } from "../Entity/Item";
 
 type SerializedEntity = {
     x: number;
@@ -73,7 +72,7 @@ type SerializedGameMap = {
     entities: SerializedEntity[];
 };
 
-export class GameScreen extends BaseScreen {
+export class Game extends Base {
     public static readonly MAP_WIDTH = 80;
     public static readonly MAP_HEIGHT = 43;
     public static readonly MIN_ROOM_SIZE = 6;
@@ -92,7 +91,7 @@ export class GameScreen extends BaseScreen {
         super(display, player);
 
         if (serializedGameMap) {
-            const [map, loadedPlayer, floor] = GameScreen.load(
+            const [map, loadedPlayer, floor] = Game.load(
                 serializedGameMap,
                 display
             );
@@ -314,11 +313,11 @@ export class GameScreen extends BaseScreen {
     generateFloor(): void {
         this.currentFloor += 1;
         this.gameMap = generateDungeon(
-            GameScreen.MAP_WIDTH,
-            GameScreen.MAP_HEIGHT,
-            GameScreen.MAX_ROOMS,
-            GameScreen.MIN_ROOM_SIZE,
-            GameScreen.MAX_ROOM_SIZE,
+            Game.MAP_WIDTH,
+            Game.MAP_HEIGHT,
+            Game.MAX_ROOMS,
+            Game.MIN_ROOM_SIZE,
+            Game.MAX_ROOM_SIZE,
             this.player,
             this.display,
             this.currentFloor
@@ -335,7 +334,7 @@ export class GameScreen extends BaseScreen {
         });
     }
 
-    update(event: KeyboardEvent): BaseScreen {
+    update(event: KeyboardEvent): Base {
         if (event.key === "s") {
             this.saveGame();
             return this;

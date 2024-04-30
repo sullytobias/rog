@@ -1,12 +1,12 @@
 import { Display } from "rot-js";
-import { Actor } from "../Entity/Entity";
-import { BaseInputHandler } from "../movement/handlerFunctions";
+import { BaseInputHandler } from "../Movement/Handlers";
+import { Actor } from "../Entity/Actor";
 
-export abstract class BaseScreen {
+export abstract class Base {
     abstract inputHandler: BaseInputHandler;
     protected constructor(public display: Display, public player: Actor) {}
 
-    abstract update(event: KeyboardEvent): BaseScreen;
+    abstract update(event: KeyboardEvent): Base;
 
     generateFloor() {}
 

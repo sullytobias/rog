@@ -1,13 +1,10 @@
 import { Display } from "rot-js";
-import { Actor } from "../Entity/Entity";
-import {
-    BaseInputHandler,
-    GameInputHandler,
-} from "../movement/handlerFunctions";
-import { BaseScreen } from "./Base";
-import { GameScreen } from "./GameScreen";
+import { BaseInputHandler, GameInputHandler } from "../Movement/Handlers";
+import { Base } from "./Base";
+import { Game } from "./Game";
 import { Engine } from "../Engine/Engine";
 import { renderFrameWithTitle } from "../Ui/Render";
+import { Actor } from "../Entity/Actor";
 
 const OPTIONS = ["[N] Play a new game"];
 
@@ -17,7 +14,7 @@ if (localStorage.getItem("roguesave")) {
 
 const MENU_WIDTH = 24;
 
-export class MainMenu extends BaseScreen {
+export class MainMenu extends Base {
     inputHandler: BaseInputHandler;
     showPopup: boolean;
 
@@ -27,16 +24,16 @@ export class MainMenu extends BaseScreen {
         this.showPopup = false;
     }
 
-    update(event: KeyboardEvent): BaseScreen {
+    update(event: KeyboardEvent): Base {
         if (this.showPopup) {
             this.showPopup = false;
         } else {
             if (event.key === "n") {
-                return new GameScreen(this.display, this.player);
+                return new Game(this.display, this.player);
             } else if (event.key === "c") {
                 try {
                     const saveGame = localStorage.getItem("roguesave");
-                    return new GameScreen(this.display, this.player, saveGame);
+                    return new Game(this.display, this.player, saveGame);
                 } catch {
                     this.showPopup = true;
                 }

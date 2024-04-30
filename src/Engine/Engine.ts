@@ -1,15 +1,10 @@
 import * as ROT from "rot-js";
 
-import { Actor } from "../Entity/Entity";
-
-import {
-    BaseInputHandler,
-    GameInputHandler,
-} from "../movement/handlerFunctions";
-import { spawnPlayer } from "../Entity/SpawnHelpers";
-import { BaseScreen } from "../Screens/Base";
-import { GameScreen } from "../Screens/GameScreen";
+import { BaseInputHandler, GameInputHandler } from "../Movement/Handlers";
+import { Base } from "../Screens/Base";
 import { MainMenu } from "../Screens/MainMenu";
+import { spawnPlayer } from "../Entity/Spawns/Actors/Player";
+import { Actor } from "../Entity/Actor";
 
 export class Engine {
     public static readonly WIDTH = 80;
@@ -19,7 +14,7 @@ export class Engine {
 
     display: ROT.Display;
     inputHandler: BaseInputHandler;
-    screen: BaseScreen;
+    screen: Base;
     player: Actor;
 
     constructor() {

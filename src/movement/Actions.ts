@@ -1,10 +1,12 @@
 import { Colors } from "../Colors/Colors";
-import { Entity, Actor, Item } from "../Entity/Entity";
-import { ImpossibleException } from "../Exeptions/Exeptions";
+import { Actor } from "../Entity/Actor";
+import { Base as BaseEntity } from "../Entity/Base";
+import { Item } from "../Entity/Item";
+import { ImpossibleException } from "../Exeptions/ImpossibleException";
 import { GameMap } from "../Map/Map";
 
 export abstract class Action {
-    abstract perform(entity: Entity, gameMap: GameMap): void;
+    abstract perform(entity: BaseEntity, gameMap: GameMap): void;
 }
 
 export abstract class ActionWithDirection extends Action {
@@ -12,11 +14,11 @@ export abstract class ActionWithDirection extends Action {
         super();
     }
 
-    abstract perform(entity: Entity, gameMap: GameMap): void;
+    abstract perform(entity: BaseEntity, gameMap: GameMap): void;
 }
 
 export class TakeStairsAction extends Action {
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         if (
             entity.x === gameMap.downstairsLocation[0] &&
             entity.y == gameMap.downstairsLocation[1]
@@ -33,7 +35,7 @@ export class TakeStairsAction extends Action {
 }
 
 export class PickupAction extends Action {
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         const consumer = entity as Actor;
         if (!consumer) return;
 
@@ -73,17 +75,17 @@ export class ItemAction extends Action {
         return gameMap.getActorAtLocation(x, y);
     }
 
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         this.item?.consumable?.activate(this, entity, gameMap);
     }
 }
 
 export class WaitAction extends Action {
-    perform(_entity: Entity) {}
+    perform(_entity: BaseEntity) {}
 }
 
 export class MovementAction extends ActionWithDirection {
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         const destX = entity.x + this.dx;
         const destY = entity.y + this.dy;
 
@@ -101,7 +103,7 @@ export class MovementAction extends ActionWithDirection {
 }
 
 export class BumpAction extends ActionWithDirection {
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         const destX = entity.x + this.dx;
         const destY = entity.y + this.dy;
 
@@ -154,7 +156,7 @@ export class EquipAction extends Action {
         super();
     }
 
-    perform(entity: Entity, _gameMap: GameMap) {
+    perform(entity: BaseEntity, _gameMap: GameMap) {
         const actor = entity as Actor;
 
         if (!actor) return;
@@ -168,13 +170,13 @@ export class LogAction extends Action {
         super();
     }
 
-    perform(_entity: Entity) {
+    perform(_entity: BaseEntity) {
         this.moveLog();
     }
 }
 
 export class DropItem extends ItemAction {
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         const dropper = entity as Actor;
 
         if (!dropper || !this.item) return;

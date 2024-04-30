@@ -1,5 +1,6 @@
 import { Colors } from "../Colors/Colors";
-import { Actor, RenderOrder } from "../Entity/Entity";
+import { Actor } from "../Entity/Actor";
+import { RenderOrder } from "../Entity/RenderOrder";
 import { Base } from "./Base";
 
 export class Fighter extends Base {

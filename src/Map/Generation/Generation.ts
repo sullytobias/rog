@@ -1,25 +1,22 @@
 import { Display, RNG } from "rot-js";
-import {
-    FLOOR_TILE,
-    STAIRS_DOWN_TILE,
-    Tile,
-    WALL_TILE,
-} from "../../Tiles/Tile-types";
+
 import { GameMap } from "../Map";
-import { Entity } from "../../Entity/Entity";
-import { Bounds } from "./interfaces";
-import {
-    spawnChainMail,
-    spawnConfusionScroll,
-    spawnDagger,
-    spawnFireballScroll,
-    spawnHealthPotion,
-    spawnLeatherArmor,
-    spawnLightningScroll,
-    spawnOrc,
-    spawnSword,
-    spawnTroll,
-} from "../../Entity/SpawnHelpers";
+import { Base as BaseEntity } from "../../Entity/Base";
+import { Bounds } from "./Bounds";
+import { spawnOrc } from "../../Entity/Spawns/Actors/Orc";
+import { spawnTroll } from "../../Entity/Spawns/Actors/Troll";
+import { spawnChainMail } from "../../Entity/Spawns/Items/Armor/ChainMail";
+import { spawnLeatherArmor } from "../../Entity/Spawns/Items/Armor/LeatherArmor";
+import { spawnHealthPotion } from "../../Entity/Spawns/Items/Potions/HealthPotion";
+import { spawnConfusionScroll } from "../../Entity/Spawns/Items/Scroll/ConfusionScroll";
+import { spawnFireballScroll } from "../../Entity/Spawns/Items/Scroll/FireballScroll";
+import { spawnLightningScroll } from "../../Entity/Spawns/Items/Scroll/LightningScroll";
+import { spawnDagger } from "../../Entity/Spawns/Items/Weapons/Dagger";
+import { spawnSword } from "../../Entity/Spawns/Items/Weapons/Sword";
+import { FLOOR_TILE } from "../../Tiles/Floor_Tile";
+import { STAIRS_DOWN_TILE } from "../../Tiles/Stair_Down_Tile";
+import { WALL_TILE } from "../../Tiles/Wall_Tile";
+import { Tile } from "../../Tiles/Tile-types";
 
 type FloorValue = [number, number][];
 
@@ -35,7 +32,7 @@ const MAX_MONSTERS_BY_FLOOR: FloorValue = [
 ];
 
 type SPAWNMAP = {
-    [key: string]: (gameMap: GameMap, x: number, y: number) => Entity;
+    [key: string]: (gameMap: GameMap, x: number, y: number) => BaseEntity;
 };
 
 export const spawnMap: SPAWNMAP = {
@@ -49,7 +46,7 @@ export const spawnMap: SPAWNMAP = {
     spawnSword,
     spawnLeatherArmor,
     spawnChainMail,
-}; 
+};
 
 type Choice = {
     value: string;
@@ -283,7 +280,7 @@ export function generateDungeon(
     maxRooms: number,
     minSize: number,
     maxSize: number,
-    player: Entity,
+    player: BaseEntity,
     display: Display,
     currentFloor: number
 ): GameMap {

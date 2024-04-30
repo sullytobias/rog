@@ -7,7 +7,7 @@ import {
     MeleeAction,
     MovementAction,
     WaitAction,
-} from "../movement/Actions";
+} from "../Movement/Actions";
 import { generateRandomNumber } from "../Map/Generation/Generation";
 import { GameMap } from "../Map/Map";
 

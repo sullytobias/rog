@@ -1,6 +1,9 @@
 import { Display, FOV } from "rot-js";
-import { Tile, WALL_TILE } from "../Tiles/Tile-types";
-import { Actor, Entity, Item } from "../Entity/Entity";
+import { Base as BaseEntity } from "../Entity/Base";
+import { Actor } from "../Entity/Actor";
+import { Item } from "../Entity/Item";
+import { Tile } from "../Tiles/Tile-types";
+import { WALL_TILE } from "../Tiles/Wall_Tile";
 
 export class GameMap {
     tiles: Tile[][];
@@ -10,7 +13,7 @@ export class GameMap {
         public width: number,
         public height: number,
         public display: Display,
-        public entities: Entity[]
+        public entities: BaseEntity[]
     ) {
         this.tiles = new Array(this.height);
         for (let y = 0; y < this.height; y++) {
@@ -23,7 +26,7 @@ export class GameMap {
         this.downstairsLocation = [0, 0];
     }
 
-    public get nonPlayerEntities(): Entity[] {
+    public get nonPlayerEntities(): BaseEntity[] {
         return this.entities.filter((e) => e.name !== "Player");
     }
 
@@ -65,7 +68,7 @@ export class GameMap {
         return false;
     }
 
-    updateFov(player: Entity) {
+    updateFov(player: BaseEntity) {
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 this.tiles[y][x].visible = false;
@@ -82,7 +85,7 @@ export class GameMap {
         });
     }
 
-    getBlockingEntityAtLocation(x: number, y: number): Entity | undefined {
+    getBlockingEntityAtLocation(x: number, y: number): BaseEntity | undefined {
         return this.entities.find(
             (e) => e.blocksMovement && e.x === x && e.y === y
         );
@@ -92,7 +95,7 @@ export class GameMap {
         return this.actors.find((a) => a.x === x && a.y === y);
     }
 
-    removeEntity(entity: Entity) {
+    removeEntity(entity: BaseEntity) {
         const index = this.entities.indexOf(entity);
 
         if (index >= 0) {
