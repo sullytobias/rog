@@ -3,18 +3,10 @@ import { Display } from "rot-js";
 import { Colors } from "../Colors/Colors";
 import { ImpossibleException } from "../Exeptions/ImpossibleException";
 
-import { generateDungeon } from "../Map/Generation/Generation";
 import { GameMap } from "../Map/Map";
+import { generateDungeon } from "../Map/Generation/Generators/generateDungeon";
 
 import { Base as BaseAction } from "../Movement/Actions/Base";
-
-import { BaseInputHandler, GameInputHandler, InputState } from "./Handlers";
-
-import {
-    renderHealthBar,
-    renderNamesAtLocation,
-    renderFrameWithTitle,
-} from "../Ui/Render";
 
 import { Base } from "./Base";
 
@@ -35,6 +27,15 @@ import { spawnDagger } from "../Entity/Spawns/Items/Weapons/Dagger";
 import { spawnSword } from "../Entity/Spawns/Items/Weapons/Sword";
 import { Actor } from "../Entity/Actor";
 import { Item } from "../Entity/Item";
+
+import { BaseInputHandler } from "../Handlers/Base";
+import { GameInputHandler } from "../Handlers/GameInputHandler";
+
+import { InputState } from "../State/State";
+
+import { renderFrameWithTitle } from "../Ui/Renders/renderFrameWithTitle";
+import { renderHealthBar } from "../Ui/Renders/renderHealthBar";
+import { renderNamesAtLocation } from "../Ui/Renders/renderNamesAtLocation";
 
 type SerializedEntity = {
     x: number;

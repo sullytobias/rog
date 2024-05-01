@@ -2,7 +2,7 @@ import { Colors } from "./Colors/Colors";
 
 import { Engine } from "./Engine/Engine";
 
-import { MessageLog } from "./Ui/MessageLog";
+import { MessageLog } from "./Ui/Messages/MessageLog";
 
 declare global {
     interface Window {

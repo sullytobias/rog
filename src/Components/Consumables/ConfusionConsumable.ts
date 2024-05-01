@@ -5,12 +5,12 @@ import { Item } from "../../Entity/Item";
 
 import { ImpossibleException } from "../../Exeptions/ImpossibleException";
 
+import { SingleRangedAttackHandler } from "../../Handlers/SingleRangedAttackHandler";
+
 import { GameMap } from "../../Map/Map";
 
 import { Base as BaseAction } from "../../Movement/Actions/Base";
 import { ItemAction } from "../../Movement/Actions/ItemAction";
-
-import { SingleRangedAttackHandler } from "../../Screens/Handlers";
 
 import { ConfusedEnemy } from "../Ai";
 

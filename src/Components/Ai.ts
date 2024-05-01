@@ -1,8 +1,7 @@
 import * as ROT from "rot-js";
 
 import { GameMap } from "../Map/Map";
-
-import { generateRandomNumber } from "../Map/Generation/Generation";
+import { generateRandomNumber } from "../Map/Generation/Generators/generateRandomNumber";
 
 import { Base as BaseAction } from "../Movement/Actions/Base";
 import { MovementAction } from "../Movement/Actions/MovementAction";
@@ -12,7 +11,6 @@ import { WaitAction } from "../Movement/Actions/WaitAction";
 
 import { Actor } from "../Entity/Actor";
 import { Base as BaseEntity } from "../Entity/Base";
-
 export abstract class Ai implements BaseAction {
     path: [number, number][];
 

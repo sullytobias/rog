@@ -5,12 +5,13 @@ import { Item } from "../../Entity/Item";
 
 import { ImpossibleException } from "../../Exeptions/ImpossibleException";
 
+import { AreaRangedAttackHandler } from "../../Handlers/AreaRangedAttackHandler";
+
 import { GameMap } from "../../Map/Map";
 
 import { Base as BaseAction } from "../../Movement/Actions/Base";
 import { ItemAction } from "../../Movement/Actions/ItemAction";
 
-import { AreaRangedAttackHandler } from "../../Screens/Handlers";
 
 import { Base } from "./Base";
 

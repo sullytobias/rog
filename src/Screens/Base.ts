@@ -1,8 +1,8 @@
 import { Display } from "rot-js";
 
-import { BaseInputHandler } from "./Handlers";
-
 import { Actor } from "../Entity/Actor";
+
+import { BaseInputHandler } from "../Handlers/Base";
 
 export abstract class Base {
     abstract inputHandler: BaseInputHandler;
