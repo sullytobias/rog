@@ -1,6 +1,8 @@
 import { Actor } from "../Entity/Actor";
 import { Item } from "../Entity/Item";
+
 import { EquipmentType } from "../Equipment/Equipment-types";
+
 import { Base } from "./Base";
 
 type Slot = {

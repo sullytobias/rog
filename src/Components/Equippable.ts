@@ -1,5 +1,7 @@
 import { Item } from "../Entity/Item";
+
 import { EquipmentType } from "../Equipment/Equipment-types";
+
 import { Base } from "./Base";
 
 export abstract class Equippable extends Base {

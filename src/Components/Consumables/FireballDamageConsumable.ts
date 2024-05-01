@@ -1,10 +1,17 @@
 import { Colors } from "../../Colors/Colors";
+
 import { Base as BaseEntity } from "../../Entity/Base";
 import { Item } from "../../Entity/Item";
+
 import { ImpossibleException } from "../../Exeptions/ImpossibleException";
+
 import { GameMap } from "../../Map/Map";
-import { Action, ItemAction } from "../../Movement/Actions";
-import { AreaRangedAttackHandler } from "../../Movement/Handlers";
+
+import { Base as BaseAction } from "../../Movement/Actions/Base";
+import { ItemAction } from "../../Movement/Actions/ItemAction";
+
+import { AreaRangedAttackHandler } from "../../Screens/Handlers";
+
 import { Base } from "./Base";
 
 export class FireballDamageConsumable extends Base {
@@ -16,7 +23,7 @@ export class FireballDamageConsumable extends Base {
         super(parent);
     }
 
-    getAction(): Action | null {
+    getAction(): BaseAction | null {
         window.messageLog.addMessage(
             "Select a target location.",
             Colors.NeedsTarget

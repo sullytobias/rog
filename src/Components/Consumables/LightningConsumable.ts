@@ -1,9 +1,13 @@
 import { Actor } from "../../Entity/Actor";
 import { Base as BaseEntity } from "../../Entity/Base";
 import { Item } from "../../Entity/Item";
+
 import { ImpossibleException } from "../../Exeptions/ImpossibleException";
+
 import { GameMap } from "../../Map/Map";
-import { ItemAction } from "../../Movement/Actions";
+
+import { ItemAction } from "../../Movement/Actions/ItemAction";
+
 import { Base } from "./Base";
 
 export class LightningConsumable extends Base {

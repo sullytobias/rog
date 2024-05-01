@@ -1,13 +1,17 @@
 import { Base as BaseEntity } from "../../Entity/Base";
 import { Item } from "../../Entity/Item";
+
 import { GameMap } from "../../Map/Map";
-import { Action, ItemAction } from "../../Movement/Actions";
+
+import { Base as BaseAction } from "../../Movement/Actions/Base";
+import { ItemAction } from "../../Movement/Actions/ItemAction";
+
 import { Inventory } from "../Inventory";
 
 export abstract class Base {
     protected constructor(public parent: Item | null) {}
 
-    getAction(): Action | null {
+    getAction(): BaseAction | null {
         if (this.parent) {
             return new ItemAction(this.parent);
         }

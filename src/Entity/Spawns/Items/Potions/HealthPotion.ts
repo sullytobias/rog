@@ -1,5 +1,7 @@
 import { HealingConsumable } from "../../../../Components/Consumables/HealingConsumable";
+
 import { GameMap } from "../../../../Map/Map";
+
 import { Item } from "../../../Item";
 
 export function spawnHealthPotion(

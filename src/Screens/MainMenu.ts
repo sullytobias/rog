@@ -1,9 +1,13 @@
 import { Display } from "rot-js";
-import { BaseInputHandler, GameInputHandler } from "../Movement/Handlers";
+import { BaseInputHandler, GameInputHandler } from "./Handlers";
+
 import { Base } from "./Base";
 import { Game } from "./Game";
+
 import { Engine } from "../Engine/Engine";
+
 import { renderFrameWithTitle } from "../Ui/Render";
+
 import { Actor } from "../Entity/Actor";
 
 const OPTIONS = ["[N] Play a new game"];

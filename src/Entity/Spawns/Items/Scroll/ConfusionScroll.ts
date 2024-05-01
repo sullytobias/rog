@@ -1,5 +1,7 @@
 import { ConfusionConsumable } from "../../../../Components/Consumables/ConfusionConsumable";
+
 import { GameMap } from "../../../../Map/Map";
+
 import { Item } from "../../../Item";
 
 export function spawnConfusionScroll(

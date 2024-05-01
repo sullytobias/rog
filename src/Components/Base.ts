@@ -1,4 +1,5 @@
 import { Base as BaseEntity } from "../Entity/Base";
+
 import { GameMap } from "../Map/Map";
 
 export abstract class Base {

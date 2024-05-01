@@ -1,18 +1,19 @@
 import { Display } from "rot-js";
 
 import { Colors } from "../Colors/Colors";
+
 import { Engine } from "../Engine/Engine";
-import {
-    Action,
-    BumpAction,
-    DropItem,
-    EquipAction,
-    LogAction,
-    PickupAction,
-    TakeStairsAction,
-    WaitAction,
-} from "./Actions";
+
 import { renderFrameWithTitle } from "../Ui/Render";
+
+import { BumpAction } from "../Movement/Actions/BumpAction";
+import { EquipAction } from "../Movement/Actions/EquipAction";
+import { LogAction } from "../Movement/Actions/LogAction";
+import { PickupAction } from "../Movement/Actions/PickupAction";
+import { TakeStairsAction } from "../Movement/Actions/TakeStairsAction";
+import { WaitAction } from "../Movement/Actions/WaitAction";
+import { Base as BaseAction } from "../Movement/Actions/Base";
+import { DropItemAction } from "../Movement/Actions/DropItemAction";
 
 interface LogMap {
     [key: string]: number;
@@ -26,7 +27,7 @@ interface DirectionMap {
     [key: string]: [number, number];
 }
 
-type ActionCallback = (x: number, y: number) => Action | null;
+type ActionCallback = (x: number, y: number) => BaseAction | null;
 
 const MOVE_KEYS: DirectionMap = {
     // Arrow Keys
@@ -84,7 +85,7 @@ export abstract class BaseInputHandler {
 
     onRender(_display: Display) {}
 
-    abstract handleKeyboardInput(event: KeyboardEvent): Action | null;
+    abstract handleKeyboardInput(event: KeyboardEvent): BaseAction | null;
 }
 
 export class GameInputHandler extends BaseInputHandler {
@@ -92,7 +93,7 @@ export class GameInputHandler extends BaseInputHandler {
         super();
     }
 
-    handleKeyboardInput(event: KeyboardEvent): Action | null {
+    handleKeyboardInput(event: KeyboardEvent): BaseAction | null {
         if (window.engine.player.fighter.hp > 0) {
             if (window.engine.player.level.requiresLevelUp) {
                 this.nextHandler = new LevelUpEventHandler();
@@ -185,7 +186,7 @@ export class CharacterScreenInputHandler extends BaseInputHandler {
         );
     }
 
-    handleKeyboardInput(_event: KeyboardEvent): Action | null {
+    handleKeyboardInput(_event: KeyboardEvent): BaseAction | null {
         this.nextHandler = new GameInputHandler();
         return null;
     }
@@ -227,7 +228,7 @@ export class LevelUpEventHandler extends BaseInputHandler {
         );
     }
 
-    handleKeyboardInput(event: KeyboardEvent): Action | null {
+    handleKeyboardInput(event: KeyboardEvent): BaseAction | null {
         if (event.key === "a") {
             window.engine.player.level.increaseMaxHp();
         } else if (event.key === "b") {
@@ -251,7 +252,7 @@ export abstract class SelectIndexHandler extends BaseInputHandler {
         this.mousePosition = [x, y];
     }
 
-    handleKeyboardInput(event: KeyboardEvent): Action | null {
+    handleKeyboardInput(event: KeyboardEvent): BaseAction | null {
         if (event.key in MOVE_KEYS) {
             const moveAmount = MOVE_KEYS[event.key];
             let modifier = 1;
@@ -276,7 +277,7 @@ export abstract class SelectIndexHandler extends BaseInputHandler {
         return null;
     }
 
-    abstract onIndexSelected(x: number, y: number): Action | null;
+    abstract onIndexSelected(x: number, y: number): BaseAction | null;
 }
 
 export class LookHandler extends SelectIndexHandler {
@@ -284,7 +285,7 @@ export class LookHandler extends SelectIndexHandler {
         super();
     }
 
-    onIndexSelected(_x: number, _y: number): Action | null {
+    onIndexSelected(_x: number, _y: number): BaseAction | null {
         this.nextHandler = new GameInputHandler();
         return null;
     }
@@ -295,7 +296,7 @@ export class LogInputHandler extends BaseInputHandler {
         super(InputState.Log);
     }
 
-    handleKeyboardInput(event: KeyboardEvent): Action | null {
+    handleKeyboardInput(event: KeyboardEvent): BaseAction | null {
         if (event.key === "Home") {
             return new LogAction(() => (this.logCursorPosition = 0));
         }
@@ -365,7 +366,7 @@ export class InventoryInputHandler extends BaseInputHandler {
         }
     }
 
-    handleKeyboardInput(event: KeyboardEvent): Action | null {
+    handleKeyboardInput(event: KeyboardEvent): BaseAction | null {
         if (event.key.length === 1) {
             const ordinal = event.key.charCodeAt(0);
             const index = ordinal - "a".charCodeAt(0);
@@ -383,7 +384,7 @@ export class InventoryInputHandler extends BaseInputHandler {
                         }
                         return null;
                     } else if (this.inputState === InputState.DropInventory) {
-                        return new DropItem(item);
+                        return new DropItemAction(item);
                     }
                 } else {
                     window.messageLog.addMessage(
@@ -404,7 +405,7 @@ export class SingleRangedAttackHandler extends SelectIndexHandler {
         super();
     }
 
-    onIndexSelected(x: number, y: number): Action | null {
+    onIndexSelected(x: number, y: number): BaseAction | null {
         this.nextHandler = new GameInputHandler();
         return this.callback(x, y);
     }
@@ -426,7 +427,7 @@ export class AreaRangedAttackHandler extends SelectIndexHandler {
         }
     }
 
-    onIndexSelected(x: number, y: number): Action | null {
+    onIndexSelected(x: number, y: number): BaseAction | null {
         this.nextHandler = new GameInputHandler();
         return this.callback(x, y);
     }

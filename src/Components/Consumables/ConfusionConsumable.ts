@@ -1,11 +1,19 @@
 import { Colors } from "../../Colors/Colors";
+
 import { Base as BaseEntity } from "../../Entity/Base";
 import { Item } from "../../Entity/Item";
+
 import { ImpossibleException } from "../../Exeptions/ImpossibleException";
+
 import { GameMap } from "../../Map/Map";
-import { Action, ItemAction } from "../../Movement/Actions";
-import { SingleRangedAttackHandler } from "../../Movement/Handlers";
+
+import { Base as BaseAction } from "../../Movement/Actions/Base";
+import { ItemAction } from "../../Movement/Actions/ItemAction";
+
+import { SingleRangedAttackHandler } from "../../Screens/Handlers";
+
 import { ConfusedEnemy } from "../Ai";
+
 import { Base } from "./Base";
 
 export class ConfusionConsumable extends Base {
@@ -13,7 +21,7 @@ export class ConfusionConsumable extends Base {
         super(parent);
     }
 
-    getAction(): Action | null {
+    getAction(): BaseAction | null {
         window.messageLog.addMessage(
             "Select a target location.",
             Colors.NeedsTarget

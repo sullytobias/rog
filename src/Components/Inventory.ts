@@ -1,6 +1,8 @@
 import { Actor } from "../Entity/Actor";
 import { Item } from "../Entity/Item";
+
 import { GameMap } from "../Map/Map";
+
 import { Base } from "./Base";
 
 export class Inventory extends Base {

@@ -1,29 +1,31 @@
 import * as ROT from "rot-js";
 
-import { Actor, Entity } from "../Entity/Entity";
-import {
-    Action,
-    BumpAction,
-    MeleeAction,
-    MovementAction,
-    WaitAction,
-} from "../Movement/Actions";
-import { generateRandomNumber } from "../Map/Generation/Generation";
 import { GameMap } from "../Map/Map";
 
-export abstract class Ai implements Action {
+import { generateRandomNumber } from "../Map/Generation/Generation";
+
+import { Base as BaseAction } from "../Movement/Actions/Base";
+import { MovementAction } from "../Movement/Actions/MovementAction";
+import { BumpAction } from "../Movement/Actions/BumpAction";
+import { MeleeAction } from "../Movement/Actions/MeleeAction";
+import { WaitAction } from "../Movement/Actions/WaitAction";
+
+import { Actor } from "../Entity/Actor";
+import { Base as BaseEntity } from "../Entity/Base";
+
+export abstract class Ai implements BaseAction {
     path: [number, number][];
 
     constructor() {
         this.path = [];
     }
 
-    abstract perform(entity: Entity, gameMap: GameMap): void;
+    abstract perform(entity: BaseEntity, gameMap: GameMap): void;
 
     calculatePathTo(
         destX: number,
         destY: number,
-        entity: Entity,
+        entity: BaseEntity,
         gameMap: GameMap
     ) {
         const isPassable = (x: number, y: number) =>
@@ -45,7 +47,7 @@ export class HostileEnemy extends Ai {
         super();
     }
 
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         const target = window.engine.player;
         const dx = target.x - entity.x;
         const dy = target.y - entity.y;
@@ -90,7 +92,7 @@ export class ConfusedEnemy extends Ai {
         super();
     }
 
-    perform(entity: Entity, gameMap: GameMap) {
+    perform(entity: BaseEntity, gameMap: GameMap) {
         const actor = entity as Actor;
         if (!actor) return;
 

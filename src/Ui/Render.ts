@@ -1,5 +1,7 @@
 import { Display } from "rot-js";
+
 import { Colors } from "../Colors/Colors";
+
 import { GameMap } from "../Map/Map";
 
 function drawColoredBar(

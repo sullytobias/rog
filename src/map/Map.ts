@@ -1,7 +1,9 @@
 import { Display, FOV } from "rot-js";
+
 import { Base as BaseEntity } from "../Entity/Base";
 import { Actor } from "../Entity/Actor";
 import { Item } from "../Entity/Item";
+
 import { Tile } from "../Tiles/Tile-types";
 import { WALL_TILE } from "../Tiles/Wall_Tile";
 

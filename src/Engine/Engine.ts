@@ -1,8 +1,9 @@
 import * as ROT from "rot-js";
 
-import { BaseInputHandler, GameInputHandler } from "../Movement/Handlers";
+import { BaseInputHandler, GameInputHandler } from "../Screens/Handlers";
 import { Base } from "../Screens/Base";
 import { MainMenu } from "../Screens/MainMenu";
+
 import { spawnPlayer } from "../Entity/Spawns/Actors/Player";
 import { Actor } from "../Entity/Actor";
 

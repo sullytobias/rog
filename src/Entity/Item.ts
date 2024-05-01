@@ -1,8 +1,11 @@
 import { Equippable } from "../Components/Equippable";
 import { Base as BaseConsumable } from "../Components/Consumables/Base";
 import { Base as BaseComponent } from "../Components/Base";
+
 import { GameMap } from "../Map/Map";
+
 import { Base } from "./Base";
+
 import { RenderOrder } from "./RenderOrder";
 
 export class Item extends Base {

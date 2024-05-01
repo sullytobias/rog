@@ -3,8 +3,11 @@ import { Equipment } from "../Components/Equipment";
 import { Fighter } from "../Components/Fighter";
 import { Inventory } from "../Components/Inventory";
 import { Level } from "../Components/Level";
+
 import { GameMap } from "../Map/Map";
+
 import { Base } from "./Base";
+
 import { RenderOrder } from "./RenderOrder";
 
 export class Actor extends Base {

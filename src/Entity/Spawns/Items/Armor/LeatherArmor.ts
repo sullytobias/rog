@@ -1,5 +1,7 @@
 import { LeatherArmor } from "../../../../Components/Equippable";
+
 import { GameMap } from "../../../../Map/Map";
+
 import { Item } from "../../../Item";
 
 export function spawnLeatherArmor(

@@ -1,16 +1,22 @@
 import { Colors } from "../../Colors/Colors";
+
 import { Actor } from "../../Entity/Actor";
 import { Base as BaseEntity } from "../../Entity/Base";
 import { Item } from "../../Entity/Item";
+
 import { ImpossibleException } from "../../Exeptions/ImpossibleException";
-import { Action, ItemAction } from "../../Movement/Actions";
+
+import { Base as BaseAction } from "../../Movement/Actions/Base";
+import { ItemAction } from "../../Movement/Actions/ItemAction";
+
 import { Inventory } from "../Inventory";
+
 import { Base } from "./Base";
 
 export class HealingConsumable implements Base {
     constructor(public amount: number, public parent: Item | null = null) {}
 
-    getAction(): Action | null {
+    getAction(): BaseAction | null {
         if (this.parent) return new ItemAction(this.parent);
 
         return null;

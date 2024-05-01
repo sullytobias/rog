@@ -1,22 +1,27 @@
 import { Display } from "rot-js";
+
 import { Colors } from "../Colors/Colors";
 import { ImpossibleException } from "../Exeptions/ImpossibleException";
+
 import { generateDungeon } from "../Map/Generation/Generation";
 import { GameMap } from "../Map/Map";
-import { Action } from "../Movement/Actions";
-import {
-    BaseInputHandler,
-    GameInputHandler,
-    InputState,
-} from "../Movement/Handlers";
+
+import { Base as BaseAction } from "../Movement/Actions/Base";
+
+import { BaseInputHandler, GameInputHandler, InputState } from "./Handlers";
+
 import {
     renderHealthBar,
     renderNamesAtLocation,
     renderFrameWithTitle,
 } from "../Ui/Render";
+
 import { Base } from "./Base";
+
 import { Tile } from "../Tiles/Tile-types";
+
 import { HostileEnemy, ConfusedEnemy } from "../Components/Ai";
+
 import { spawnOrc } from "../Entity/Spawns/Actors/Orc";
 import { spawnPlayer } from "../Entity/Spawns/Actors/Player";
 import { spawnTroll } from "../Entity/Spawns/Actors/Troll";
@@ -342,7 +347,7 @@ export class Game extends Base {
 
         const action = this.inputHandler.handleKeyboardInput(event);
 
-        if (action instanceof Action) {
+        if (action instanceof BaseAction) {
             try {
                 action.perform(this.player, this.gameMap);
                 this.handleEnemyTurns();

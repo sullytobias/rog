@@ -1,5 +1,7 @@
 import { LightningConsumable } from "../../../../Components/Consumables/LightningConsumable";
+
 import { GameMap } from "../../../../Map/Map";
+
 import { Item } from "../../../Item";
 
 export function spawnLightningScroll(

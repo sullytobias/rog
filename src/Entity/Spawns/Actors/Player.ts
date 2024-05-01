@@ -2,7 +2,9 @@ import { Equipment } from "../../../Components/Equipment";
 import { Fighter } from "../../../Components/Fighter";
 import { Inventory } from "../../../Components/Inventory";
 import { Level } from "../../../Components/Level";
+
 import { GameMap } from "../../../Map/Map";
+
 import { Actor } from "../../Actor";
 
 export function spawnPlayer(

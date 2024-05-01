@@ -1,5 +1,7 @@
 import { FireballDamageConsumable } from "../../../../Components/Consumables/FireballDamageConsumable";
+
 import { GameMap } from "../../../../Map/Map";
+
 import { Item } from "../../../Item";
 
 export function spawnFireballScroll(

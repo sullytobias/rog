@@ -1,5 +1,7 @@
 import { Base as BaseComponent } from "../Components/Base";
+
 import { GameMap } from "../Map/Map";
+
 import { RenderOrder } from "./RenderOrder";
 
 export abstract class Base {

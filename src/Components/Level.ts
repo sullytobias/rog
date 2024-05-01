@@ -1,4 +1,5 @@
 import { Actor } from "../Entity/Actor";
+
 import { Base } from "./Base";
 
 export class Level extends Base {
